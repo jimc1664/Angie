@@ -1,0 +1,33 @@
+# Wavefront MTL file
+# Creator: Ultimate Unwrap3D Pro v3.09
+# Time: Tue Oct 14 14:52:34 2008
+# num_materials: 3
+
+newmtl visor
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+d 1.000000
+illum 2
+Ns 1.000000
+map_Kd visor.png
+
+newmtl scifem
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+d 1.000000
+illum 2
+Ns 1.000000
+map_Kd scifem2.jpg
+
+newmtl mech_girl
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+d 1.000000
+illum 2
+Ns 1.000000
+map_Kd mech_girl.jpg
+
+# num_materials: 3

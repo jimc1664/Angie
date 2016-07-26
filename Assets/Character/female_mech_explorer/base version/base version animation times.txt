@@ -1,0 +1,18 @@
+mech girl animations
+
+Idle 2-336  (1-334)
+Walk 338-377 (336-375
+death 379-469 (377-467
+run 470-500  (469-499
+jump 502-542 (501-541
+punch 543-555 (542-554
+kick 556-567 (555-566
+
+walk_withgun 569-608 (568-607
+run with gun 610-640 (609-639
+stand_shoot 642-650  (640-649
+kneel_shoot 652-658    (651-657
+idle holding gun 660-875 (
+
+
+3.4 scaling from xsi

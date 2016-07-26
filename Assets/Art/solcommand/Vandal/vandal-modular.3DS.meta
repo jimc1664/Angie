@@ -1,0 +1,125 @@
+fileFormatVersion: 2
+guid: 53bddfa2468c04e498648a34016b9ba9
+ModelImporter:
+  serializedVersion: 15
+  fileIDToRecycleName:
+    100000: bonus_mod0
+    100002: bonus_modu
+    100004: cargo_upg0
+    100006: cargo_upgr
+    100008: Engine1
+    100010: engine2
+    100012: engine3
+    100014: gun_spot_0
+    100016: gun_spot_u
+    100018: sensor_up0
+    100020: sensor_up1
+    100022: sensor_upg
+    100024: ship_hull
+    100026: //RootNode
+    400000: bonus_mod0
+    400002: bonus_modu
+    400004: cargo_upg0
+    400006: cargo_upgr
+    400008: Engine1
+    400010: engine2
+    400012: engine3
+    400014: gun_spot_0
+    400016: gun_spot_u
+    400018: sensor_up0
+    400020: sensor_up1
+    400022: sensor_upg
+    400024: ship_hull
+    400026: //RootNode
+    2300000: bonus_mod0
+    2300002: bonus_modu
+    2300004: cargo_upg0
+    2300006: cargo_upgr
+    2300008: Engine1
+    2300010: engine2
+    2300012: engine3
+    2300014: gun_spot_0
+    2300016: gun_spot_u
+    2300018: sensor_up0
+    2300020: sensor_up1
+    2300022: sensor_upg
+    2300024: ship_hull
+    3300000: bonus_mod0
+    3300002: bonus_modu
+    3300004: cargo_upg0
+    3300006: cargo_upgr
+    3300008: Engine1
+    3300010: engine2
+    3300012: engine3
+    3300014: gun_spot_0
+    3300016: gun_spot_u
+    3300018: sensor_up0
+    3300020: sensor_up1
+    3300022: sensor_upg
+    3300024: ship_hull
+    4300000: ship_hull
+    4300002: engine2
+    4300004: engine3
+    4300006: cargo_upgr
+    4300008: cargo_upg0
+    4300010: bonus_modu
+    4300012: gun_spot_u
+    4300014: bonus_mod0
+    4300016: sensor_upg
+    4300018: sensor_up0
+    4300020: sensor_up1
+    4300022: Engine1
+    4300024: gun_spot_0
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .100000001
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  userData: 

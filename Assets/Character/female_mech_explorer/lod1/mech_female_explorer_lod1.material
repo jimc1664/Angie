@@ -1,0 +1,67 @@
+material 
+{
+	technique
+	{
+		pass
+		{
+		}
+	}
+}
+
+material scifem2
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 1 1
+			diffuse 1 1 1
+			specular 0 0 0 128
+			emissive 0 0 0
+
+			texture_unit
+			{
+				texture scifem2.jpg
+				filtering point point point
+			}
+		}
+	}
+}
+material visor
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 1 1
+			diffuse 1 1 1
+			specular 0 0 0 128
+			emissive 0 0 0
+
+			texture_unit
+			{
+				texture visor.png
+				filtering point point point
+			}
+		}
+	}
+}
+material mech_girl
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 1 1
+			diffuse 1 1 1
+			specular 0 0 0 128
+			emissive 0 0 0
+
+			texture_unit
+			{
+				texture mech_girl.jpg
+				filtering point point point
+			}
+		}
+	}
+}

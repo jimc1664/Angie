@@ -1,0 +1,621 @@
+fileFormatVersion: 2
+guid: b9f1ee3ddb5e188468623b7b55a07c0b
+ModelImporter:
+  serializedVersion: 15
+  fileIDToRecycleName:
+    100000: Armature
+    100002: Biped_Skeleton_Chest
+    100004: Biped_Skeleton_Chest1
+    100006: Biped_Skeleton_ChestEffector
+    100008: Biped_Skeleton_ChestEffector1
+    100010: Biped_Skeleton_eff
+    100012: Biped_Skeleton_eff1
+    100014: Biped_Skeleton_eff14
+    100016: Biped_Skeleton_eff15
+    100018: Biped_Skeleton_eff16
+    100020: Biped_Skeleton_eff17
+    100022: Biped_Skeleton_eff18
+    100024: Biped_Skeleton_eff19
+    100026: Biped_Skeleton_GlobalSRT
+    100028: Biped_Skeleton_LBicep
+    100030: Biped_Skeleton_LFootBone1
+    100032: Biped_Skeleton_LFootBone2
+    100034: Biped_Skeleton_LFootBone3
+    100036: Biped_Skeleton_LFootRoot
+    100038: Biped_Skeleton_LForearm
+    100040: Biped_Skeleton_LHand
+    100042: Biped_Skeleton_LHandRoot
+    100044: Biped_Skeleton_LRoot
+    100046: Biped_Skeleton_LRoot1
+    100048: Biped_Skeleton_LShin
+    100050: Biped_Skeleton_LShoulder
+    100052: Biped_Skeleton_LShoulderRoot
+    100054: Biped_Skeleton_LThigh
+    100056: Biped_Skeleton_RBicep
+    100058: Biped_Skeleton_RFootBone1
+    100060: Biped_Skeleton_RFootBone2
+    100062: Biped_Skeleton_RFootBone3
+    100064: Biped_Skeleton_RFootRoot
+    100066: Biped_Skeleton_RForearm
+    100068: Biped_Skeleton_RHand
+    100070: Biped_Skeleton_RHandRoot
+    100072: Biped_Skeleton_RRoot
+    100074: Biped_Skeleton_RRoot1
+    100076: Biped_Skeleton_RShin
+    100078: Biped_Skeleton_RShoulder
+    100080: Biped_Skeleton_RShoulderRoot
+    100082: Biped_Skeleton_RThigh
+    100084: Biped_Skeleton_Spine1
+    100086: Biped_Skeleton_Spine2
+    100088: Biped_Skeleton_Spine3
+    100090: Biped_Skeleton_Spine4
+    100092: Biped_Skeleton_Spine5
+    100094: Biped_Skeleton_Spine6
+    100096: Biped_Skeleton_SpineRoot
+    100098: Biped_Skeleton_SpineRoot1
+    100100: Biped_Skeleton_UpperBody
+    100102: Body
+    100104: meshU3D
+    100106: SceneRoot
+    100108: SceneRoot0
+    100110: //RootNode
+    400000: Armature
+    400002: Biped_Skeleton_Chest
+    400004: Biped_Skeleton_Chest1
+    400006: Biped_Skeleton_ChestEffector
+    400008: Biped_Skeleton_ChestEffector1
+    400010: Biped_Skeleton_eff
+    400012: Biped_Skeleton_eff1
+    400014: Biped_Skeleton_eff14
+    400016: Biped_Skeleton_eff15
+    400018: Biped_Skeleton_eff16
+    400020: Biped_Skeleton_eff17
+    400022: Biped_Skeleton_eff18
+    400024: Biped_Skeleton_eff19
+    400026: Biped_Skeleton_GlobalSRT
+    400028: Biped_Skeleton_LBicep
+    400030: Biped_Skeleton_LFootBone1
+    400032: Biped_Skeleton_LFootBone2
+    400034: Biped_Skeleton_LFootBone3
+    400036: Biped_Skeleton_LFootRoot
+    400038: Biped_Skeleton_LForearm
+    400040: Biped_Skeleton_LHand
+    400042: Biped_Skeleton_LHandRoot
+    400044: Biped_Skeleton_LRoot
+    400046: Biped_Skeleton_LRoot1
+    400048: Biped_Skeleton_LShin
+    400050: Biped_Skeleton_LShoulder
+    400052: Biped_Skeleton_LShoulderRoot
+    400054: Biped_Skeleton_LThigh
+    400056: Biped_Skeleton_RBicep
+    400058: Biped_Skeleton_RFootBone1
+    400060: Biped_Skeleton_RFootBone2
+    400062: Biped_Skeleton_RFootBone3
+    400064: Biped_Skeleton_RFootRoot
+    400066: Biped_Skeleton_RForearm
+    400068: Biped_Skeleton_RHand
+    400070: Biped_Skeleton_RHandRoot
+    400072: Biped_Skeleton_RRoot
+    400074: Biped_Skeleton_RRoot1
+    400076: Biped_Skeleton_RShin
+    400078: Biped_Skeleton_RShoulder
+    400080: Biped_Skeleton_RShoulderRoot
+    400082: Biped_Skeleton_RThigh
+    400084: Biped_Skeleton_Spine1
+    400086: Biped_Skeleton_Spine2
+    400088: Biped_Skeleton_Spine3
+    400090: Biped_Skeleton_Spine4
+    400092: Biped_Skeleton_Spine5
+    400094: Biped_Skeleton_Spine6
+    400096: Biped_Skeleton_SpineRoot
+    400098: Biped_Skeleton_SpineRoot1
+    400100: Biped_Skeleton_UpperBody
+    400102: Body
+    400104: meshU3D
+    400106: SceneRoot
+    400108: SceneRoot0
+    400110: //RootNode
+    4300000: meshU3D
+    7400000: Take 001
+    9500000: //RootNode
+    13700000: meshU3D
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    animationCompression: 3
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .0264999997
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human:
+    - boneName: Biped_Skeleton_RThigh
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RShin
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RFootBone2
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RFootBone3
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_UpperBody
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_Spine2
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_Chest
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RShoulder
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RBicep
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RForearm
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_RHand
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_Spine5
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_Spine6
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LShoulder
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LBicep
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LForearm
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LHand
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LThigh
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LShin
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LFootBone2
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Biped_Skeleton_LFootBone3
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: untitled(Clone)
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: Armature
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 8.72664643e-08, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: SceneRoot0
+      position: {x: -.00706476765, y: 0, z: -.0238582939}
+      rotation: {x: -6.12323426e-17, y: 1, z: 6.12323426e-17, w: 7.54980007e-08}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: Body
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: 3.17864988e-08, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: SceneRoot
+      position: {x: 4.75542419e-33, y: -3.88309847e-17, z: -4.75542456e-33}
+      rotation: {x: .0655940622, y: .968914628, z: .238541201, w: .000101842044}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_GlobalSRT
+      position: {x: -1.18464272e-09, y: .0221411884, z: 0}
+      rotation: {x: .216847122, y: .00146472733, z: -.0656026974, w: .973997712}
+      scale: {x: 1, y: 1.00000012, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_UpperBody
+      position: {x: -3.94881794e-10, y: 1.06342757, z: -1.57952185e-09}
+      rotation: {x: .0223215893, y: 9.05035935e-10, z: 1.05113669e-08, w: .999750853}
+      scale: {x: 1, y: .999999881, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_LRoot1
+      position: {x: -.0897155628, y: -.064222753, z: .017237464}
+      rotation: {x: .809937119, y: -2.39265696e-09, z: -.470015436, w: -.350838065}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_LThigh
+      position: {x: -0, y: 6.06537299e-07, z: -5.05447737e-08}
+      rotation: {x: -.3036322, y: .794597566, z: -.186003625, w: .491756886}
+      scale: {x: .99999994, y: 1.00000012, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_LShin
+      position: {x: 3.15903836e-09, y: .488458335, z: 4.73857087e-09}
+      rotation: {x: .0385984555, y: -.356084526, z: .0385644063, w: .93285948}
+      scale: {x: .999999881, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_eff16
+      position: {x: 6.31810337e-09, y: .409738213, z: -6.31810337e-09}
+      rotation: {x: -.362864166, y: .68563652, z: -.0705624893, w: .627098978}
+      scale: {x: .999999881, y: 1.00000012, z: .999999702}
+      transformModified: 1
+    - name: Biped_Skeleton_LFootRoot
+      position: {x: 7.10785608e-09, y: 3.34859294e-07, z: 0}
+      rotation: {x: .929266274, y: .275868148, z: .195839226, w: .148351073}
+      scale: {x: 1, y: 1.00000024, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_LFootBone1
+      position: {x: -0, y: 4.58060441e-07, z: 0}
+      rotation: {x: .0456352867, y: .299765587, z: -.766290486, w: .56644243}
+      scale: {x: 1, y: .99999994, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_LFootBone2
+      position: {x: -3.15903836e-09, y: .0835588202, z: 0}
+      rotation: {x: .0161450393, y: -.0305244923, z: .0720773265, w: .996801138}
+      scale: {x: 1.00000012, y: 1, z: .999999821}
+      transformModified: 1
+    - name: Biped_Skeleton_LFootBone3
+      position: {x: -6.31810337e-09, y: .0857689753, z: 0}
+      rotation: {x: .0121412119, y: .0936335698, z: .162749663, w: .982139468}
+      scale: {x: 1.00000012, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_eff18
+      position: {x: 3.15903836e-09, y: .0808074027, z: 0}
+      rotation: {x: -.0201682784, y: .0197745916, z: -.707611442, w: .706036985}
+      scale: {x: 1, y: .99999994, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_RRoot1
+      position: {x: .0897154063, y: -.0642228574, z: .0172374491}
+      rotation: {x: -.0402733088, y: -3.35770736e-08, z: .928205729, w: .369881332}
+      scale: {x: .99999994, y: 1, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_RThigh
+      position: {x: 1.01089547e-07, y: 1.11198506e-06, z: 1.57952185e-09}
+      rotation: {x: .163810357, y: -.481778532, z: .31166023, w: .802448452}
+      scale: {x: 1.00000024, y: .999999821, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_RShin
+      position: {x: -0, y: .488456726, z: 6.31810337e-09}
+      rotation: {x: -.0396988392, y: .354758412, z: .0374155641, w: .933365226}
+      scale: {x: 1.00000012, y: .99999994, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_eff17
+      position: {x: -0, y: .409738749, z: 6.31810337e-09}
+      rotation: {x: -.53210324, y: .597775638, z: .0712713972, w: .595357716}
+      scale: {x: .99999994, y: .999999762, z: .999999702}
+      transformModified: 1
+    - name: Biped_Skeleton_RFootRoot
+      position: {x: 6.31810337e-09, y: 2.93792255e-07, z: 0}
+      rotation: {x: .945940673, y: -.0353224985, z: -.17115055, w: -.273232669}
+      scale: {x: .999999881, y: 1, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_RFootBone1
+      position: {x: -0, y: 1.86383772e-07, z: -6.31810337e-09}
+      rotation: {x: -.0438735597, y: -.0664991811, z: .553266525, w: .829185843}
+      scale: {x: .999999881, y: 1, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_RFootBone2
+      position: {x: -0, y: .0835585743, z: 0}
+      rotation: {x: .00227775332, y: -.00464200089, z: -.0738347024, w: .997257113}
+      scale: {x: .99999994, y: .999999881, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_RFootBone3
+      position: {x: -0, y: .085768573, z: 6.31810337e-09}
+      rotation: {x: .163064778, y: .986458182, z: -.00628535962, w: -.0164521877}
+      scale: {x: 1.00000012, y: .999999821, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_eff19
+      position: {x: 6.31810337e-09, y: .0808073729, z: -6.31810337e-09}
+      rotation: {x: .0193020701, y: -.0198454317, z: -.707651675, w: .706018984}
+      scale: {x: 1.00000012, y: 1.00000012, z: .999999821}
+      transformModified: 1
+    - name: Biped_Skeleton_SpineRoot
+      position: {x: -1.18464272e-09, y: .0428159423, z: -.0114917196}
+      rotation: {x: -.0135273319, y: -.706982553, z: .0129751945, w: .706982553}
+      scale: {x: 1.00000012, y: 1.00000012, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine1
+      position: {x: 3.94881772e-09, y: 5.05447758e-07, z: 0}
+      rotation: {x: .000389794033, y: -2.20266866e-05, z: .0377526842, w: .999287069}
+      scale: {x: 1, y: .99999994, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine2
+      position: {x: 1.26361801e-08, y: .0703190491, z: 3.94881794e-10}
+      rotation: {x: 8.33168645e-09, y: 2.68502776e-10, z: -.0415250696, w: .999137461}
+      scale: {x: .99999994, y: .99999994, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine3
+      position: {x: 4.73857087e-09, y: .0702712461, z: -3.94881794e-10}
+      rotation: {x: -4.17027468e-10, y: 7.48306861e-10, z: -.0527210757, w: .998609304}
+      scale: {x: .99999994, y: .99999994, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_Chest
+      position: {x: -1.26361801e-08, y: .0703122914, z: 0}
+      rotation: {x: -2.05219042e-09, y: -6.28594954e-10, z: .0272279344, w: .999629259}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_ChestEffector
+      position: {x: -6.31810337e-09, y: .208970934, z: -3.94881794e-10}
+      rotation: {x: 3.55469538e-08, y: 5.07930276e-09, z: -.699608803, w: .714526176}
+      scale: {x: .99999994, y: .99999994, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_LShoulderRoot
+      position: {x: .00370209757, y: -.0134385172, z: .0491808988}
+      rotation: {x: .0237766095, y: .762467384, z: .638832033, w: .0998589173}
+      scale: {x: .999999881, y: .999999821, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_LShoulder
+      position: {x: -1.01089547e-07, y: 1.09934717e-06, z: 2.52723602e-08}
+      rotation: {x: -.0389321297, y: .0951759592, z: .0437838547, w: .993734777}
+      scale: {x: .999999881, y: .999999821, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_eff1
+      position: {x: 3.03268649e-07, y: .123083271, z: -1.57952194e-08}
+      rotation: {x: .0456980318, y: -.055885829, z: .993677437, w: .085986197}
+      scale: {x: .999999762, y: 1.00000024, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_LRoot
+      position: {x: 1.01089547e-07, y: 1.66797622e-06, z: 0}
+      rotation: {x: .0603470206, y: .175776049, z: -.770384729, w: .60989219}
+      scale: {x: 1, y: 1, z: 1.00000024}
+      transformModified: 1
+    - name: Biped_Skeleton_LBicep
+      position: {x: -5.05447737e-08, y: 2.0217883e-06, z: 0}
+      rotation: {x: .086833097, y: -.0704373717, z: -.55121088, w: .82684046}
+      scale: {x: 1.00000036, y: .999999821, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_LForearm
+      position: {x: -2.02178839e-07, y: .268964112, z: 3.15903836e-09}
+      rotation: {x: -.00174243515, y: -.00032454115, z: .000291857548, w: .999998391}
+      scale: {x: .999999762, y: .99999994, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_eff15
+      position: {x: -2.02178839e-07, y: .215961143, z: 0}
+      rotation: {x: .167938933, y: -.173783481, z: .969727695, w: -.0349865295}
+      scale: {x: .999999642, y: 1.00000024, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_LHandRoot
+      position: {x: -0, y: 1.26361806e-06, z: 2.52723602e-08}
+      rotation: {x: .351530612, y: .039890185, z: .762722254, w: .541377664}
+      scale: {x: .99999994, y: .99999994, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_LHand
+      position: {x: 3.79085137e-08, y: 1.01089552e-06, z: 5.05447737e-08}
+      rotation: {x: -.134589911, y: .0530812815, z: -.174351618, w: .973996639}
+      scale: {x: 1, y: .999999821, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_RShoulderRoot
+      position: {x: .00370260375, y: -.0134370532, z: -.0491810068}
+      rotation: {x: .705523431, y: -.675649524, z: .151211157, w: -.151227102}
+      scale: {x: 1, y: .99999994, z: 1.00000012}
+      transformModified: 1
+    - name: Biped_Skeleton_RShoulder
+      position: {x: 1.18464272e-09, y: 1.2130746e-06, z: 5.05447737e-08}
+      rotation: {x: .335905671, y: .590765119, z: .420057714, w: .601427972}
+      scale: {x: 1.00000036, y: 1.00000012, z: .999999762}
+      transformModified: 1
+    - name: Biped_Skeleton_eff
+      position: {x: -2.02178839e-07, y: .123083226, z: -1.26361801e-08}
+      rotation: {x: .220804915, y: -.223065183, z: .43299818, w: .844985008}
+      scale: {x: .999999404, y: 1.00000036, z: .999999821}
+      transformModified: 1
+    - name: Biped_Skeleton_RRoot
+      position: {x: -1.01089547e-07, y: 1.01089552e-06, z: 0}
+      rotation: {x: .684090137, y: .446423799, z: .540743947, w: .200804561}
+      scale: {x: 1.00000024, y: 1.00000012, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_RBicep
+      position: {x: 1.01089547e-07, y: 1.3647076e-06, z: 0}
+      rotation: {x: .317079067, y: .521125197, z: .78122884, w: .132555231}
+      scale: {x: 1.00000036, y: 1.00000024, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_RForearm
+      position: {x: 1.01089547e-07, y: .268961221, z: 7.89760968e-09}
+      rotation: {x: -.00229879655, y: .0194873773, z: .0121666463, w: .999733448}
+      scale: {x: 1, y: .99999994, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_eff14
+      position: {x: -1.01089547e-07, y: .215964317, z: -6.31810337e-09}
+      rotation: {x: -.152094647, y: .137617841, z: .958730042, w: .196888909}
+      scale: {x: .999999821, y: .999999821, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_RHandRoot
+      position: {x: 1.01089547e-07, y: 1.92069865e-06, z: 5.05447737e-08}
+      rotation: {x: .831150949, y: -.262504965, z: .482778311, w: .0848790929}
+      scale: {x: 1, y: 1.00000012, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_RHand
+      position: {x: -7.58170273e-08, y: 2.83051781e-06, z: -7.58170273e-08}
+      rotation: {x: .0823644996, y: .256359011, z: .951295972, w: -.150106996}
+      scale: {x: 1, y: .99999994, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_SpineRoot1
+      position: {x: -2.52723612e-06, y: 1.89542835e-08, z: 3.94881794e-10}
+      rotation: {x: .000128563013, y: .000128601008, z: 1.6533269e-08, w: 1}
+      scale: {x: .99999994, y: .99999994, z: .99999994}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine4
+      position: {x: 1.01089547e-07, y: 1.53845474e-06, z: 7.89760923e-10}
+      rotation: {x: -.000181821117, y: 4.49583513e-06, z: .724484444, w: .68929112}
+      scale: {x: .999999881, y: .999999881, z: .999999881}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine5
+      position: {x: 3.15903836e-09, y: .0493369289, z: -3.94881794e-10}
+      rotation: {x: 1.33598199e-08, y: -3.18453375e-10, z: -.00582672376, w: .999983013}
+      scale: {x: 1, y: 1.00000012, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_Spine6
+      position: {x: 7.10785608e-09, y: .0493352078, z: 0}
+      rotation: {x: -1.63091918e-09, y: 9.02554975e-11, z: -.0059211445, w: .999982476}
+      scale: {x: .99999994, y: 1, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_Chest1
+      position: {x: -7.89760923e-10, y: .0493366122, z: -3.94881794e-10}
+      rotation: {x: 8.75246986e-10, y: -5.59280365e-11, z: -.0041206195, w: .999991536}
+      scale: {x: .99999994, y: .99999994, z: 1}
+      transformModified: 1
+    - name: Biped_Skeleton_ChestEffector1
+      position: {x: 1.57952185e-09, y: .0493379384, z: 3.94881794e-10}
+      rotation: {x: 2.54082408e-08, y: -5.67482994e-09, z: -.713455737, w: .700700283}
+      scale: {x: 1, y: .999999881, z: 1}
+      transformModified: 1
+    - name: meshU3D
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: -.707106829, y: 0, z: -0, w: .707106829}
+      scale: {x: 1, y: 1, z: 1}
+      transformModified: 1
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 3
+  userData: 

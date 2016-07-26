@@ -1,0 +1,28 @@
+Thankyou for buying this Arteria3d Character Content Pack.  Below you will find
+a list of the start/stop times of the animations contained within the mesh file.
+FPS is 28fps
+
+
+
+mech girl animations
+
+Idle 2-336
+Walk 338-377
+death 379-469
+run 470-500
+jump 502-542
+punch 543-555
+kick 556-567
+
+walk_withgun 569-608
+run with gun 610-640
+stand_shoot 642-650
+kneel_shoot 652-658
+idle holding gun 660-875
+
+
+
+(c) 2008 Steve Finney/Arteria Gaming.  As part of the license for this product, you must credit Arteria3d.com on 
+your game credits
+
+
