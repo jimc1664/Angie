@@ -159,7 +159,8 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
  
         }
 
-        CtorMain.Singleton.update(this);
+        if(CtorMain.Singleton.isActiveAndEnabled ) //todo -- better
+            CtorMain.Singleton.update(this);
 
 
     }

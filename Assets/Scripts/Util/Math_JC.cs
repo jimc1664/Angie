@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using System;
 
+public class MonoBehaviourComparer<T> : IComparer<T> where T : MonoBehaviour {
+    public int Compare(T a, T b) {
+        return a.GetInstanceID().CompareTo(b.GetInstanceID());
+    }
+};
+
 public class DuplicateKeyComparer<TKey>
                    : IComparer<TKey> where TKey : System.IComparable {
     public int Compare(TKey x, TKey y) {

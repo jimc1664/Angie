@@ -222,6 +222,7 @@ public class Structure : UIEle {
 
     public class Quad {
         public Face F;
+        public Voxel V;
         public struct Vi_S {
             public int A, B, C, D;
             public int this[int i] {
@@ -253,6 +254,7 @@ public class Structure : UIEle {
     };
     public class Tri {
         public Face F;
+        public Voxel V;
         public struct Vi_S {
             public int A, B, C;
             public int this[int i] {
@@ -503,7 +505,6 @@ public class Structure : UIEle {
             var c = !(v1.Nbrs[f1] || v2.Nbrs[f2]);
             var col = c ? Color.green : Color.red;
             Debug.DrawLine(v1.transform.position, v2.transform.position, col);
-
         }
 
         if(v1.Nbrs[f1] || v2.Nbrs[f2]) return false;
@@ -514,9 +515,11 @@ public class Structure : UIEle {
 
         for(int j = 4; j-- > 0;) {
             float d = 0;
+            
             for(int i = 4; i-- > 0;) {
                 int vi1 = FaceVi[(int)f1, i];
                 int vi2 = FaceVi[(int)f2, (4 + j - i) % 4];
+                if(cntx.Flag[v1, vi1] || cntx.Flag[v1, vi1]) continue;
                 d += (cntx.Crnr[v1, vi1] - cntx.Crnr[v2, vi2]).magnitude;
             }
             if(d < cd) {
@@ -560,7 +563,16 @@ public class Structure : UIEle {
             return false;
         }
         for(int i = 4; i-- > 0;) {
-            int vi1 = FaceVi[(int)f1, i], vi2 = FaceVi[(int)f2, (4 + cj - i) % 4];
+            int vi1 = FaceVi[(int)f1, i], vi2 = FaceVi[(int)f2, (8 + cj - i) % 4];
+            bool flg1 = cntx.Flag[v1, vi1], flg2 = cntx.Flag[v2, vi2];
+            if( flg1 != flg2 ) {
+                if(flg1) {
+                    cj--;
+                    continue;
+                }
+                cj++;
+                vi2 = FaceVi[(int)f2, (8 + cj - i) % 4];
+            }
             mergeVertex(cntx, ref cntx.V_Verts[v1.TInd, vi1], ref cntx.V_Verts[v2.TInd, vi2], v1, v2);
             Debug.Assert(ReferenceEquals(cntx.Vert[v1, vi1], cntx.Vert[v2, vi2]));
         }
@@ -585,12 +597,17 @@ public class Structure : UIEle {
 
                 float cD = 3.0f;
                 v.forEach((FaceT fi1) => {
+                    var vc = cntx.FaceVc[v, fi1];
+
+                    if(vc < 3) return;
 
                     if(Vector3.Dot(v.MP[(int)fi1, 1], -vecN) < lim) return;
                     //todo -  break forEach
                     // cFi1 = (int)fi1;
 
                     n.forEach((FaceT fi2) => {
+                        if(cntx.FaceVc[n, fi2] != vc) return;
+
                         if(Vector3.Dot(n.MP[(int)fi2, 1], vecN) < lim) return;
                         if(Vector3.Dot(n.MP[(int)fi2, 1], -v.MP[(int)fi1, 1]) < 0.8f) return;
                         //todo -  break forEach
@@ -615,6 +632,54 @@ public class Structure : UIEle {
                 if(t) pn.Add(n);
             }
             v.PossNbr = pn;
+        }
+        for( int qi = cntx.Quads.Count; qi-- >0; ) {
+            var q = cntx.Quads[qi];
+            var v = q.V;
+            if(v.State == Voxel.StateE.Invalid) continue;
+
+            var vc = 4;
+            var mp = Vector3.zero;
+            for(int i = 4; i-- > 0;) 
+                mp +=cntx.Crnr[v, q.Verts[i] ];           
+            mp *= 0.25f;
+
+            var nrm = Vector3.Cross(cntx.Crnr[v, q.Verts.B] - cntx.Crnr[v, q.Verts.A], cntx.Crnr[v, q.Verts.D] - cntx.Crnr[v, q.Verts.A]).normalized;
+
+            foreach(var n in v.PossNbr) {
+
+                var vec = v.Pos - n.Pos;
+                var vecN = vec.normalized;
+                float lim = 0.8f;
+               // int cFi1 = -1, cFi2 = -1;
+
+                float cD = 3.0f;
+               // v.forEach((FaceT fi1) => {
+                    if(Vector3.Dot(nrm, -vecN) < lim) return;
+                    //todo -  break forEach
+                    // cFi1 = (int)fi1;
+
+                    n.forEach((FaceT fi2) => {
+                        if(cntx.FaceVc[n, fi2] != vc) return;
+
+                        if(Vector3.Dot(n.MP[(int)fi2, 1], vecN) < lim) return;
+                        if(Vector3.Dot(n.MP[(int)fi2, 1], -nrm) < 0.8f) return;
+                        //todo -  break forEach
+                        //cFi2 = (int)fi2;
+                       
+                        float d = (mp - n.MP[(int)fi2, 0]).sqrMagnitude;
+                        if(d < cD) {
+                            cD = d;
+                            nLinks.Add(d, new NbrLink() {
+                                V1 = v,
+                                V2 = n,
+                               /// Fi1 = (FaceT)(int.MinValue + qi), 
+                                Fi2 = fi2
+                            });
+                        }
+                    });
+                //});
+            }
         }
 
         for(int iter = 99999; ;) {
@@ -672,49 +737,6 @@ public class Structure : UIEle {
 
             v.State = Voxel.StateE.Pending;
 
-            for(int j = l; j-- > 0;) {
-                var v2 = Vox[j];
-                if(v2.State == Voxel.StateE.Invalid) continue;
-
-                var vec = v.Pos - v2.transform.localPosition;
-                var sm = vec.sqrMagnitude;
-                if(sm > 4.0f)
-                    continue;
-                if(sm < 0.25f) {
-                    v.State = Voxel.StateE.Invalid;
-                    goto label_breakContinue;
-                }
-                v.PossNbr.Add(v2);
-            }
-
-            v.MP = v.getMidPoints();
-            v.VGroup = 1 << (vIndex++ % 64);
-
-            var mp = v.MP;
-
-            for(int i = 2; i-- > 0;) {
-                // Vector3 n2 = Vector3.left;
-                for(int j = 2; j-- > 0;) {
-                    Vector3 lp, lv;
-                    int fi1 = ((int)FaceT.Down - i), fi2 = ((int)FaceT.Left - j);
-                    if(!Math_JC.planePlaneIntersection(out lp, out lv, mp[fi1, 1], mp[fi1, 0], mp[fi2, 1], mp[fi2, 0])) Debug.LogError("err");
-
-                    lv.Normalize();
-                    // Vector3 n3 = Vector3.forward;
-                    for(int k = 2; k-- > 0;) {
-                        int fi3 = ((int)FaceT.Back - k);
-                        if(!Math_JC.linePlaneIntersection(out lp, lp, lv, mp[fi3, 1], mp[fi3, 0])) Debug.LogError("err");
-
-                        int ii = i * 4 + j * 2 + k;
-                        cntx.Crnr[v, ii] = lp;
-
-                        if(v.Crnr[ii] != null && v.Crnr[ii].Flag) {
-                            //Debug.Log("clipped");
-                            cntx.Flag[v, ii] = true;
-                        }
-                    }
-                }
-            }
             int effFc = 6;
             v.Faces = new Face[6];
             v.forEach((FaceT fi) => {
@@ -740,6 +762,53 @@ public class Structure : UIEle {
                 continue;
             }
 
+
+            for(int j = l; j-- > 0;) {
+                var v2 = Vox[j];
+                if(v2.State == Voxel.StateE.Invalid) continue;
+
+                var vec = v.Pos - v2.transform.localPosition;
+                var sm = vec.sqrMagnitude;
+                if(sm > 4.0f)
+                    continue;
+                if(sm < 0.25f) {
+                    v.State = Voxel.StateE.Invalid;
+                    goto label_breakContinue;
+                }
+                v.PossNbr.Add(v2);
+            }
+
+            v.MP = v.getMidPoints();
+            v.VGroup = 1 << (vIndex++ % 64);
+
+            var mp = v.MP;
+            bool clipping = false;
+            for(int i = 2; i-- > 0;) {
+                // Vector3 n2 = Vector3.left;
+                for(int j = 2; j-- > 0;) {
+                    Vector3 lp, lv;
+                    int fi1 = ((int)FaceT.Down - i), fi2 = ((int)FaceT.Left - j);
+                    if(!Math_JC.planePlaneIntersection(out lp, out lv, mp[fi1, 1], mp[fi1, 0], mp[fi2, 1], mp[fi2, 0])) Debug.LogError("err");
+
+                    lv.Normalize();
+                    // Vector3 n3 = Vector3.forward;
+                    for(int k = 2; k-- > 0;) {
+                        int fi3 = ((int)FaceT.Back - k);
+                        if(!Math_JC.linePlaneIntersection(out lp, lp, lv, mp[fi3, 1], mp[fi3, 0])) Debug.LogError("err");
+
+                        int ii = i * 4 + j * 2 + k;
+                        cntx.Crnr[v, ii] = lp;
+
+                        if(v.Crnr[ii] != null && v.Crnr[ii].Flag) {
+                            //Debug.Log("clipped");
+                            clipping = cntx.Flag[v, ii] = true;                           
+                        }
+                    }
+                }
+            }
+
+            if(!clipping) continue;
+
             SimpleBitField mask = new SimpleBitField();
             int ca_NbrI = -1;
             System.Func<int, int> countAdj = (int c ) => {
@@ -764,7 +833,7 @@ public class Structure : UIEle {
                     switch(nc) {
                         case 0: {//a tri
                                 Debug.Log("tri " + c);
-                                var t = new Tri() { };
+                                var t = new Tri() { V = v };
                                 for(int j = 3; j-- > 0;) {
                                     //Debug.DrawLine(transform.TransformPoint(cntx.Crnr[v, c]), transform.TransformPoint(cntx.Crnr[v, VertAdj[c, j]]));
                                     t.Verts[j] = VertAdj[c, j];
@@ -785,7 +854,7 @@ public class Structure : UIEle {
                                     Debug.Assert(nc != 0);
                                     continue;
                                 }
-                                var q = new Quad() { };
+                                var q = new Quad() { V = v };
                                 q.Verts.A = VertAdj[c, (j + 1) % 3];
                                 q.Verts.B = VertAdj[c, (j + 2) % 3];
                                 q.Verts.C = VertAdj[n, (ca_NbrI + 1) % 3];
@@ -794,6 +863,10 @@ public class Structure : UIEle {
                                 cntx.Quads.Add(q);
                                 Debug.Log("quad " + c + " -> " + n);
                                 mask[c] = mask[n] = true;
+
+                                //special case -- can form neighbour links
+                                //continue here
+
                                 break;
                             }
                         case 2: { //double tri -- sharp corner of two slopes
@@ -805,7 +878,7 @@ public class Structure : UIEle {
                                 Debug.Assert(!mask[n1]);
                                 Debug.Assert(!mask[n2]);
                                 System.Action<int> dt = (int a) => {
-                                    var t = new Tri() { };
+                                    var t = new Tri() { V = v };
                                     for(int j = 3; j-- > 0;) {   
                                         var k = VertAdj[a, j];
                                         if(k == c) k = n3;
@@ -822,7 +895,7 @@ public class Structure : UIEle {
                         case 3: {//single tri but on the adjacent to the opposite of C -- beveled corner of two slopes
                                 Debug.Log(" s3  tri  c " + c);
                                 mask[c] = true;
-                                var t = new Tri() { };
+                                var t = new Tri() { V = v };
                                 cntx.Tris.Add(t);
                                 int vc = 2;
                                 for(int j = 3; j-- > 0;) {
@@ -886,10 +959,9 @@ public class Structure : UIEle {
         }
 
         foreach(var t in cntx.Tris) {
-            var v = Vox[0];
+            var v = t.V;
             for(int i = 3; i-- > 0;)
                 t.Verts[i] = cntx.Vi[v, t.Verts[i]];
-
 
             t.F = new Face() { V1 = v, };
 
@@ -899,13 +971,12 @@ public class Structure : UIEle {
             t.F.Tr = tr;
         }
         foreach(var t in cntx.Quads) {
-            var v = Vox[0];
+            var v = t.V;
             for(int i = 4; i-- > 0;)
                 t.Verts[i] = cntx.Vi[v, t.Verts[i]];
 
-
             t.F = new Face() { V1 = v, };
-
+            
             var tr = new TriRef();
             tr.Vox = v;
             tr.D = 0;
@@ -1404,8 +1475,10 @@ public class Structure : UIEle {
             //for(int z = Grid.GetLength(2); z-- > 0;) {
             //  var v = Grid[x, y, z];
             //if(v == null) continue;
-            if(v.enSelected())
+            if(v.enSelected()) {
                 Selection.Add(v);
+                CtorMain.Singleton.DirtySelection = true;
+            }
         }
     }
 

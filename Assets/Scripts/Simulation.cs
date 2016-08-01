@@ -52,6 +52,7 @@ public class Simulation : MonoBehaviour {
 
     public List<Drone> WarpingDrones = new List<Drone>();
     public List<Area> Areas = new List<Area>();
+    //public List<Area> Areas = new List<Area>();
 
 
     public struct FrameCntx {
@@ -107,10 +108,30 @@ public class Simulation : MonoBehaviour {
                 d.update(ref fc);
 
             foreach(var ds in DSwap) {
-                if(ds.A != null ) ds.A.Remove(ds.Dr);
-                if(ds.B != null ) ds.B.Add(ds.Dr);
-                ds.Dr._Ar = ds.Ar;
-            //    Debug.Log("swap " + ds.Dr.Ar + "   ==== "+FrameInd);
+                //if(ds.A != null )
+
+                if(ds.Ar != null) {
+                    ds.Ar.addDrone(ds.Dr);
+                    if(ds.A != null) {
+                        Debug.Assert(ReferenceEquals(ds.A, WarpingDrones));
+                        ds.A.Remove(ds.Dr);
+                    }
+                    Debug.Assert(ReferenceEquals(ds.B, ds.Ar.Drones));
+                } else {
+                    Debug.Assert(ds.Dr.Ar != null);
+                    ds.Dr.Ar.remDrone(ds.Dr);
+                    //ds.Dr._Ar = null;// ds.Ar;
+                    if(ds.B != null) {
+                        ds.B.Add(ds.Dr);
+                        Debug.Assert(ReferenceEquals(ds.B, WarpingDrones));
+                    }
+                }
+
+
+                //if(ds.B != null )
+//                ds.A.Remove(ds.Dr);
+//                ds.B.Add(ds.Dr);
+                //  Debug.Log("swap " + ds.Dr.Ar + "   ==== "+FrameInd);
             }
             DSwap.Clear();
             FrameInd++;

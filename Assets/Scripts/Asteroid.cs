@@ -8,7 +8,7 @@ public class Asteroid : Body {
 
     public override void init() {
 
-        var ar = GetComponentInParent<Area>();
+        var ar = GetComponentInParent<Sim.Area>();
         Trnsfrm = transform;
         var sim = Simulation.Singleton;
         Bdy = new Sim.Body() {

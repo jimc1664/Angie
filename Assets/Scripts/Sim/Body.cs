@@ -32,7 +32,8 @@ namespace Sim {
 
 
     [System.Serializable]
-    public class Body {
+    public class Body : ScriptableObject {
+        [System.NonSerialized]
         public SimObj Host;
 
 
@@ -103,12 +104,19 @@ namespace Sim {
         }
     }
 
+
+    public class Entity : Body {
+        public Faction Owner;
+        public MasterAi Ai;
+        public float Power, MaxPower;
+    }
+
 }
 
 
 public class Body : SimObj {
 
-
+    [System.NonSerialized]
     public Sim.Body Bdy;
     public float Rad = 0.5f;
 

@@ -27,24 +27,38 @@ public class MiningDrone : Body {
 
     public Sim.Drone Drn;
 
-    public bool Enemy = false;
+    public bool Fighter = false;
 
     void Awake() {
     //    Trnsfrm = transform;
     }
 
     public override void init() {
-        Drn._Ar = GetComponentInParent<Area>();
+        var ar = GetComponentInParent<Sim.Area>();
 
-        var st = Drn.Ar.GetComponentInChildren<Station>();
-        st.Bdy._Ar = Drn._Ar;
+        var st = ar.GetComponentInChildren<Station>();
+        st.init();
         init(st);
     }
     public void init( Station st )  {
+       // Debug.Log(" st  " + st + " st.Sm.Host  " + st.Sm.Host + "   st.Owner  " + st.Owner);
+        Debug.Assert(ReferenceEquals((st.Sm.Host as Station), st ));
+        Drn.St = st.Sm;
+        Drn.Owner = st.Owner;
+        Drn.St.Dependants.Add(Drn);
 
-        Drn.St = st;
-        Drn._Ar = st.Bdy.Ar;
-        Drn._Ar.Drones.Add(Drn);
+        Drn.Ai = st.Ai;
+        Drn.Target = null;
+        
+
+        if(Fighter) {
+            Drn.St.FighterCnt++;
+            Drn._Behavior = Sim.Drone.BehaviorT.Hunt;
+        }  else
+            Drn.St.MinerCnt++;
+
+        st.Bdy.Ar.addDrone(Drn);
+
     }
     void OnEnable() {
 
@@ -65,6 +79,8 @@ public class MiningDrone : Body {
             initAVel = AVel,
             Host = this,
 
+
+            MaxPower = 50, Power = 10,
         };
 
     }
@@ -79,10 +95,7 @@ public class MiningDrone : Body {
             Vel = fd.Vel;
             AVel = fd.AVel;
 
-            if(Enemy) {
-                
 
-            }
         }
     }
 
@@ -105,6 +118,7 @@ public class MiningDrone : Body {
         Quaternion desAvel = Quaternion.identity;
         Vector3 desDir = rotM.GetRow(2);
 
+        /*
         Gizmos.color = Color.red;
         Gizmos.DrawLine(Trnsfrm.position, Trnsfrm.position + desDir);
 
@@ -118,9 +132,10 @@ public class MiningDrone : Body {
 
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(Trnsfrm.position, Trnsfrm.position + xAx);
-
+        */
 
         Gizmos.color = Color.white;
+        if( Drn != null && Drn.Owner)  Gizmos.color = Drn.Owner.Col;
         Gizmos.DrawWireSphere(Trnsfrm.position, Rad);
     }
 

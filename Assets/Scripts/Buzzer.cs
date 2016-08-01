@@ -30,7 +30,7 @@ public class Buzzer : Body {
     public bool Enemy = false;
 
     public override void init() {
-        Drn._Ar = GetComponentInParent<Area>();
+        Drn._Ar = GetComponentInParent<Sim.Area>();
 
         var st = Drn.Ar.GetComponentInChildren<Beacon>();
         st.Ar = Drn._Ar;
@@ -39,8 +39,8 @@ public class Buzzer : Body {
     public void init(Beacon b ) {
 
         Drn.Bcn = b;
-        Drn._Ar = b.Ar;
-        Drn._Ar.Drones.Add(Drn);
+        b.Ar.addDrone(Drn  );
+        
     }
     void OnEnable() {
         Trnsfrm = transform;

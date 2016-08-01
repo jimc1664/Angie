@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Spawnables : MonoBehaviour {
 
-    public GameObject MiningShip, Buzzer;
+    public GameObject MiningShip, Buzzer, FighterDrn;
 
 
     public List<Recipe> Recipes; 

@@ -8,35 +8,29 @@ public class Beacon : MonoBehaviour {
 
     public float EnergyGain = 1;
 
-    public Area Ar;
+    public Sim.Area Ar;
 
     [System.Serializable]
     public class AreaDat {
-        public Area Ar;
-
+        public Sim.Area Ar;
         public float LastVisit = -1000;
-
-
     };
 
     public List<AreaDat> TargetAreas;
 
 
-    public Area getTargetArea() {
+    public Sim.Area getTargetArea() {
 
         float d = float.MinValue;
-        Area ret = null;
+        Sim.Area ret = null;
 
         return TargetAreas[Random.Range(0, TargetAreas.Count)].Ar;
     }
 
 
     void Start () {
-
-        Ar = GetComponentInParent<Area>();
-
-
-        foreach(var a in FindObjectsOfType<Area>()) {
+        Ar = GetComponentInParent<Sim.Area>();
+        foreach(var a in FindObjectsOfType<Sim.Area>()) {
             if(a.GetComponentInChildren<Asteroid>()) {
                 TargetAreas.Insert( Random.Range(0,TargetAreas.Count), new AreaDat() { Ar = a });
             }
@@ -44,10 +38,7 @@ public class Beacon : MonoBehaviour {
 	}
 
 	void Update () {
-
-
         Energy += EnergyGain * Time.deltaTime;
-
         if(Energy > 20) {
             var md = (Instantiate(Spawnables.Singleton.Buzzer, transform.position, transform.rotation) as GameObject).GetComponent<Buzzer>();
             md.init( this );
