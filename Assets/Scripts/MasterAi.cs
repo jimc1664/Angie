@@ -105,6 +105,7 @@ namespace Sim {
 
             foreach(var a in FindObjectsOfType<Area>()) {
                 if(a.GetComponentInChildren<Asteroid>()) {
+                    if( (st.transform.position - a.transform.position ).magnitude  > st.WarpRange ) continue;
                     var ad = new AreaDat() { Ar = a, };
                     TargetAreas.Insert(Random.Range(0, TargetAreas.Count), ad );
                     Areas.Add(a, ad);

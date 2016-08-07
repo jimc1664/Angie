@@ -22,9 +22,10 @@ public class Planetoid : MonoBehaviour {
 
     public Planet_Type PType;
 
-    public GameObject Pui, Spr; 
-
-    public void init(ref StarGen.PlanetDat p, GameObject pUI ) {
+    public GameObject Pui, Spr;
+    public int Seed;
+    public void init(ref StarGen.PlanetDat p, GameObject pUI, int seed ) {
+        Seed = seed;
 
         planet_no = p.planet_no;
         a = p.a;
@@ -77,14 +78,20 @@ public class Planetoid : MonoBehaviour {
         Pui = pUI;
         float oa = a;
 
+        Random.seed = Seed;
+        Theta = Random.value * Mathf.PI * 2;
+
         if(planet_no < 0) {
-            transform.localPosition = Vector3.right * oa;
+          //  transform.localPosition = Vector3.right * oa;
 
         } else {
             oa = moon_a;
-            transform.localPosition = Vector3.back * oa;
+         //   transform.localPosition = Vector3.back * oa;
         }
 
+        float x = oa * Mathf.Cos(Theta);
+        float y = oa * Mathf.Sin(Theta );
+        transform.localPosition = new Vector3(x, 0, y);
         /*
         var go = new GameObject(); go.name = "Sprite";
         var sr = go.AddComponent<SpriteRenderer>();
@@ -99,8 +106,16 @@ public class Planetoid : MonoBehaviour {
 
         Instantiate(StarGen.Singleton.OrbitLR).GetComponent<OrbitPath>().init(transform.parent, oa );
     }
+    
+    void positionSpr( float s = 1 ) {
 
-
+        var st = Spr.transform;
+        float scl = Mathf.Pow(radius / 6378.0f, 1.0f / 3.0f) * 30.0f / 100;
+        scl = Mathf.Max( 0.125f*s, scl * Mathf.Sqrt(s));
+        st.localScale = Vector3.one * scl ;
+        st.parent = transform;
+        st.localPosition = new Vector3(0, scl * 0.5f, 0);
+    }
     void initSpr() {
 
         var pui = Instantiate(Pui);
@@ -110,18 +125,18 @@ public class Planetoid : MonoBehaviour {
         Spr = pui;
         Debug.Log("Spr " + Spr);
         var img = pui.GetComponent<UnityEngine.UI.Image>();
-       // img.sprite = type_sprite(PType);
-        var st = img.transform;
-        float scl = Mathf.Sqrt(radius / 6378.0f) * 30.0f / 100;
-        st.localScale = Vector3.one * scl;
-        st.parent = transform;
-        st.localPosition = new Vector3(0, scl *0.5f, 0);
+        // img.sprite = type_sprite(PType);
+        positionSpr();
 
         PairedButton b1 = Pui.GetComponentInChildren<PairedButton>(), b2 = Spr.GetComponentInChildren<PairedButton>();
         b1.setOther(b2);
+
     }
 
     void Update() {
+
+
+
        // Debug.Log("Spr " + Spr);
         if(Spr == null)
             return;
@@ -141,9 +156,23 @@ public class Planetoid : MonoBehaviour {
 
 
     }
+
+    void click() {
+        Debug.Log("click " + name);
+
+        var cam = FindObjectOfType<OrbitCam>();
+        cam.setTarget(transform);
+    }
+    void Start() {
+        UnityEngine.UI.Button b1 = Pui.GetComponentInChildren<UnityEngine.UI.Button>(), b2 = Spr.GetComponentInChildren<UnityEngine.UI.Button>();
+        b1.onClick.AddListener(click);
+        b2.onClick.AddListener(click);
+    }
     void LateUpdate() {
         if(Spr == null) return;
-
+        float d = (Camera.main.transform.position - transform.position).magnitude;
+        Debug.DrawLine(Camera.main.transform.position, transform.position);
+        positionSpr( d * 0.1f);
         Spr.transform.rotation = Quaternion.LookRotation( Camera.main.transform.forward  );
     }
 
@@ -186,7 +215,9 @@ public class Planetoid : MonoBehaviour {
         }
         //err
         return sg.Unknown;
-    } 
+    }
+
+    public float Theta = 0;         //orbital progress
 
     public int planet_no;
     public float a;                    /* semi-major axis of solar orbit (in AU)*/

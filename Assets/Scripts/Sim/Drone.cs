@@ -137,9 +137,7 @@ namespace Sim {
                         Asteroid[] trgs;
                         trgs = Ar.GetComponentsInChildren<Asteroid>();
                         if(trgs.Length == 0) {
-                            trgs = GameObject.FindObjectsOfType<Asteroid>();
-                            // St.warp(this, trgs[Random.Range(0, trgs.Length)].Ar );
-                            setWarpTarget(trgs[Random.Range(0, trgs.Length)].Bdy.Ar);
+                            setWarpTarget(Ai.getTargetArea()  );
 
                             return true;
                         } else {

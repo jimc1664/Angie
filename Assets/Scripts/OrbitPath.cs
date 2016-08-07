@@ -11,8 +11,9 @@ public class OrbitPath : MonoBehaviour {
     private float Theta = 0f;
     LineRenderer LR;
 
-
+    public float A;
     public void init( Transform p, float a ) {
+        A = a;
         transform.parent = p;
         transform.localPosition = Vector3.zero;
 
@@ -46,10 +47,18 @@ public class OrbitPath : MonoBehaviour {
             // Debug.Log("w " + w);
         }
 #endif
-        var m = Vector3.Dot(cam.transform.rotation * Vector3.forward, -cam.transform.position);
+        //var m = Vector3.Dot(cam.transform.rotation * Vector3.forward, -cam.transform.position);
+
+        Vector3 cp = transform.InverseTransformPoint( cam.transform.position ), p1 = cp;
+        p1.y = 0;
+        p1 = p1.normalized * A;
+        var p2 = -p1;
+        var m = ((cp - p1).magnitude + (cp - p2).magnitude )*0.5f;
         //m = Mathf.Pow(m*0.05f, 2.0f);
         float w = 0.0015f *m;
         //Camera.current.transform.position.magnitude;
         LR.SetWidth(w, w);
+      //  Debug.DrawLine( transform.TransformPoint(p1), cam.transform.position);
+      //  Debug.DrawLine(transform.TransformPoint(p2), cam.transform.position, Color.grey );
     }
 }

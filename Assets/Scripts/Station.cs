@@ -195,7 +195,7 @@ public class Station : Body {
     public float Power = 50, PowerGain = 1, MaxPower = 100, PowerMod, PowerProjected;
     public float Minerals = 50, MineralsGain = 0, MaxMinerals = 100;
 
-
+    public float WarpRange = 10;
     public MasterAi Ai;
     public StarSystem Sys;
 
@@ -289,6 +289,17 @@ public class Station : Body {
         }
     }
 
+    void OnDrawGizmos() {
 
-    
+        
+
+                    Trnsfrm = transform;
+
+        Gizmos.DrawWireSphere(Trnsfrm.position, Rad);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(Trnsfrm.position, WarpRange);
+
+    }
+
 }
