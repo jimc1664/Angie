@@ -70,7 +70,8 @@ public class Planetoid : MonoBehaviour {
         type = p.type;
         minor_moons = p.minor_moons;
 
-
+        // SimpleRandom rand = new SimpleRandom(Seed);
+        Random.seed = Seed;
         PType = (Planet_Type)type;
 
         name = type_string(PType);
@@ -78,9 +79,10 @@ public class Planetoid : MonoBehaviour {
         Pui = pUI;
         float oa = a;
 
-        Random.seed = Seed;
-        Theta = Random.value * Mathf.PI * 2;
 
+        Random.seed = Seed;
+        //Theta = rand.randf() * Mathf.PI * 2;
+        Theta = Random.value* Mathf.PI * 2;
         if(planet_no < 0) {
           //  transform.localPosition = Vector3.right * oa;
 
@@ -123,7 +125,7 @@ public class Planetoid : MonoBehaviour {
         pui.AddComponent<UnityEngine.UI.CanvasScaler>();
         pui.AddComponent<UnityEngine.UI.GraphicRaycaster>();//.ignoreReversedGraphics = false;
         Spr = pui;
-        Debug.Log("Spr " + Spr);
+      //  Debug.Log("Spr " + Spr);
         var img = pui.GetComponent<UnityEngine.UI.Image>();
         // img.sprite = type_sprite(PType);
         positionSpr();

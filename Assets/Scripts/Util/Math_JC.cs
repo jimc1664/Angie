@@ -94,6 +94,11 @@ public static class Math_JC {
         return vectorNormalized *= size;
     }
 
+    public static Rect extended(this Rect r, Vector2 p ) {
+        r.min = Vector2.Min(r.min, p);
+        r.max = Vector2.Max(r.max, p);
+        return r;
+    }
 
     //Find the line of intersection between two planes.	The planes are defined by a normal and a point on that plane.
     //The outputs are a point on the line and a vector which indicates it's direction. If the planes are not parallel, 

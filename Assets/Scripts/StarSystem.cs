@@ -19,6 +19,15 @@ public class StarSystem : MonoBehaviour {
         public Vector2 GetPosition() {
                 return Pos;// * 10.0f;
         }
+        public float Rad {
+            get {
+                return _Rad;
+            }
+            set {
+                _Rad = value;
+            }
+        }
+        float _Rad;
         public Vector3 Pos3 {
             get {
                 return new Vector3( Pos.x,0, Pos.y);
@@ -26,7 +35,7 @@ public class StarSystem : MonoBehaviour {
         }
         public List<Area> Nbrs;
 
-        public int Island;
+        public int Island = -1;
     };
 
     List<Area> Areas;
@@ -59,8 +68,8 @@ public class StarSystem : MonoBehaviour {
         float areaPass = 0, areaTheta = Random.value * Mathf.PI * 2;
 
         Areas = new List<Area>();
-        float bounds = 50;
-        QuadTree<Area> qt = new QuadTree<Area>( 8, new Rect( -bounds, -bounds, bounds*2, bounds*2) );
+        //float bounds = 50;
+        QuadTree<Area> qt = new QuadTree<Area>(3); //, new Rect( -bounds, -bounds, bounds*2, bounds*2) );
         //Debug.Log("xxx " + qt.QuadRect);
 
         List<int> islandRedir = new List<int>( 32 );
@@ -120,7 +129,7 @@ public class StarSystem : MonoBehaviour {
                         var ar = Instantiate(StarGen.Singleton.Area).transform;
                         ar.transform.parent = star.transform;
 
-                        float lrp = Random.Range(-1.0f, 1.0f) * Random.value * 0.4f + 0.5f;
+                        float lrp = Random.Range(-1.0f, 1.0f) * (Random.value*0.3f+0.7f) * 0.4f + 0.5f;
                         float a = Mathf.Lerp(lPlanet.a, p.a, lrp);
 
                         //var theta = Random.value * Mathf.PI * 2;
@@ -149,7 +158,7 @@ public class StarSystem : MonoBehaviour {
 
                         if(island == islandRedir.Count)
                             islandRedir.Add(island);
-                        var ar2 = new Area() { Pos = ap, Nbrs = nbrs, Island = island };
+                        var ar2 = new Area() { Pos = ap, Nbrs = nbrs, Island = island, Rad = 0.1f };
                         Areas.Add(ar2);
                         
                         qt.Insert(ar2);
@@ -157,9 +166,6 @@ public class StarSystem : MonoBehaviour {
                 } else {
                     areaPass = areaDensityFunc(p.a);
                 }
-
-
-
 
                 uit.parent = ui;
                 lpui = uit;
@@ -188,10 +194,18 @@ public class StarSystem : MonoBehaviour {
                // go.transform.localPosition = Vector3.down * p.moon_e;
             }
 
+
             spr.sprite = Planetoid.type_sprite((Planetoid.Planet_Type)p.type);
 
             planet.init(ref p, uiGo, Seed + pi* 829 + mi* 947);
 
+            {
+                var ap3 = planet.transform.position;
+                var ar2 = new Area() { Pos = new Vector2(ap3.x, ap3.z), Nbrs = new List<Area>(), Island = 0, Rad = 0.3f };
+                Areas.Add(ar2);
+
+                // qt.Insert(ar2)
+            }
 
         });
         // Debug.Log("xxx2 " + qt.QuadRect);
@@ -226,6 +240,8 @@ public class StarSystem : MonoBehaviour {
 
         foreach(var a1 in Areas) {
             Gizmos.color = (a1.Island == 0) ? Color.green : Color.red;
+
+            Gizmos.DrawWireSphere(a1.Pos3, a1.Rad);
             foreach(var a2 in a1.Nbrs)
                 Gizmos.DrawLine(a1.Pos3, a2.Pos3);
 

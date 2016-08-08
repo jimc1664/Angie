@@ -37,11 +37,13 @@ namespace Sim {
             Attack,
             PrepWarp,
             Warping,
+            PilotCtrl,
         };
         public enum BehaviorT {
             Mine,
             //Dropoff,
             Hunt,
+            Player,
         };
 
         public StateT _State = StateT.EnterArea;
@@ -110,13 +112,13 @@ namespace Sim {
                 Delta = fc.Delta;
                 FrameInd = fc.FrameInd;
 
-                DesVel = EffPos = DesDir = ODesDir = Vector3.zero;
+                DesVel = EffPos = DesDir = ODesDir = DesUp = Vector3.zero;
                 MinVel = 0;
 
                 Pos = c.Pos;
             }
 
-            public Vector3 EffPos, DesVel, DesDir, ODesDir, Pos;
+            public Vector3 EffPos, DesVel, DesDir, ODesDir, Pos, DesUp;
             public float MinVel;
         };
         bool act_Idle(ref DroneCntx cntx ) {
@@ -181,6 +183,9 @@ namespace Sim {
                             setWarpTarget(a);
                     } else
                         return true;
+                    break;
+                case BehaviorT.Player:
+                    _State = StateT.PilotCtrl;
                     break;
             }
             return false;
@@ -306,6 +311,17 @@ namespace Sim {
             return false;
         }
 
+        bool act_PilotCtrl(ref DroneCntx cntx) {
+            PlayerShipCtrlr ctrlr = Host as PlayerShipCtrlr;
+
+            cntx.DesDir = ctrlr.CamCntrl.transform.forward;
+            cntx.DesUp = ctrlr.CamCntrl.transform.up;
+
+            cntx.DesVel += ctrlr.CamCntrl.FlyInput * MaxVel;
+
+            return false;
+        }
+
         void subUp( ref Simulation.FrameCntx fc,  FrameDat c, ref FrameDat n  ) {
 
             var cntx = new DroneCntx(ref fc, c );
@@ -316,7 +332,7 @@ namespace Sim {
 
             cntx.EffPos = c.Pos + c.Vel * 0.5f;
             cntx.ODesDir = cntx.DesDir = rotM.GetRow(2);
-
+            cntx.DesUp = rotM.GetRow(1);
             //Vector3 cntx.DesVel = Vector3.zero;
             Quaternion desAvel = Quaternion.identity;
 
@@ -346,6 +362,9 @@ namespace Sim {
                         break;
                     case StateT.Idle:
                         if(act_Idle( ref cntx)) continue;
+                        break;
+                    case StateT.PilotCtrl:
+                        if(act_PilotCtrl( ref cntx)) continue;
                         break;
                     case StateT.EnterArea:
                         //Debug.Log(Host.name + "entered area  " + Ar.name);
@@ -429,7 +448,7 @@ namespace Sim {
             if(cntx.DesDir != cntx.ODesDir) {
 
 
-                Vector3 yAx = Vector3.Cross(cntx.DesDir, rotM.GetRow(0)), xAx = Vector3.Cross(rotM.GetRow(1), cntx.DesDir);
+                Vector3 yAx = Vector3.Cross(cntx.DesDir, rotM.GetRow(0)), xAx = Vector3.Cross(cntx.DesUp, cntx.DesDir);
                 yAx = Vector3.Cross(cntx.DesDir, xAx);
 
                 var desRot = Quaternion.LookRotation(cntx.DesDir, yAx);
