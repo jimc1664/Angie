@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Demos">
+      <UniqueIdentifier>{FB1A670C-6CED-1643-A35A-ABA40E7D4D0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Demos\VoronoiFractureDemo">
+      <UniqueIdentifier>{67946DEC-BE9C-3441-86D7-9043EAF99028}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Demos\VoronoiFractureDemo\VoronoiFractureDemo.h">
+      <Filter>Demos\VoronoiFractureDemo</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Demos\VoronoiFractureDemo\main.cpp">
+      <Filter>Demos\VoronoiFractureDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Demos\VoronoiFractureDemo\VoronoiFractureDemo.cpp">
+      <Filter>Demos\VoronoiFractureDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Demos\VoronoiFractureDemo\Win32VoronoiFractureDemo.cpp">
+      <Filter>Demos\VoronoiFractureDemo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\bullet.rc" />
+  </ItemGroup>
+</Project>

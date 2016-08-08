@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Extras">
+      <UniqueIdentifier>{E068DC14-02AD-6244-8944-BC9BC8410CF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Extras\HACD">
+      <UniqueIdentifier>{D9517E70-038A-A34B-993F-0DD3A94A482F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Extras\HACD\hacdCircularList.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdGraph.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdHACD.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdICHull.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdManifoldMesh.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdVector.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Extras\HACD\hacdVersion.h">
+      <Filter>Extras\HACD</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Extras\HACD\hacdGraph.cpp">
+      <Filter>Extras\HACD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Extras\HACD\hacdHACD.cpp">
+      <Filter>Extras\HACD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Extras\HACD\hacdICHull.cpp">
+      <Filter>Extras\HACD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Extras\HACD\hacdManifoldMesh.cpp">
+      <Filter>Extras\HACD</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
