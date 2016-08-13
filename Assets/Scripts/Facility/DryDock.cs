@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class DryDock : MonoBehaviour {
-
+    /*
     public MiningDrone InConstruction;
 
     public float Eta;
@@ -23,5 +23,5 @@ public class DryDock : MonoBehaviour {
             }
         }
 
-    }
+    } */
 }

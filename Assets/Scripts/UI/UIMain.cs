@@ -24,6 +24,8 @@ ICancelHandler - OnCancel - Called when the cancel button is pressed*/
 
 public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
+    public GameObject Popup_Panel, Popup_Button, Popup_ButtonEx;
+
     public RectTransform SolSys;
 
     public GameObject UI_Hl = null;

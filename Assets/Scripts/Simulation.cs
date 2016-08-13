@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Sim;
 
+
 public class Simulation : MonoBehaviour {
 
     public float Glob_KineticScale = 1.0f;
@@ -50,7 +51,7 @@ public class Simulation : MonoBehaviour {
 
     SortedList<int, Frame> Frames = new SortedList<int, Frame>();
 
-    public List<Drone> WarpingDrones = new List<Drone>();
+    public List<Sim.Drone> WarpingDrones = new List<Sim.Drone>();
     public List<Area> Areas = new List<Area>();
     //public List<Area> Areas = new List<Area>();
 
@@ -126,11 +127,11 @@ public class Simulation : MonoBehaviour {
                         Debug.Assert(ReferenceEquals(ds.B, WarpingDrones));
                     }
                 }
-
+                ds.Dr.fd_Sync(fc.FrameInd);
 
                 //if(ds.B != null )
-//                ds.A.Remove(ds.Dr);
-//                ds.B.Add(ds.Dr);
+                //                ds.A.Remove(ds.Dr);
+                //                ds.B.Add(ds.Dr);
                 //  Debug.Log("swap " + ds.Dr.Ar + "   ==== "+FrameInd);
             }
             DSwap.Clear();
@@ -142,8 +143,8 @@ public class Simulation : MonoBehaviour {
     }
 
     public struct DroneSwap {
-        public Drone Dr;
-        public List<Drone> A, B;
+        public Sim.Drone Dr;
+        public List<Sim.Drone> A, B;
         public Area Ar;
     };
     public List<DroneSwap> DSwap = new List<DroneSwap>();

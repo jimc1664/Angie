@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 //using System;
 
@@ -21,10 +21,14 @@ public class StarGen : MonoBehaviour {
     public Sprite SubSubGasGiant;
     public Sprite Asteroids;
     public Sprite OneFace;
-
+     
 
     public GameObject Sphere;
     public GameObject Area;
+
+
+    public List<GameObject> RoidFabs;
+    public List<Material> RoidMats;
 
 #if UNITY_EDITOR
     public const string LibName = "plg_dbg";

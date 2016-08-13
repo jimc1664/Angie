@@ -9,7 +9,7 @@ public class World : MonoBehaviour {
 	//note :-  make this the first script to update (at least before anything else that would use this plugin),  
 		//http://docs.unity3d.com/Documentation/Components/class-ScriptExecution.html
 	
-	static World Singleton;
+	public static World Singleton;
 	int Reference =0;
 	
 	//IntPtr Buffer = IntPtr.Zero; 
@@ -149,4 +149,11 @@ public class World : MonoBehaviour {
         }
     }
 
+
+
+
+
+    public GameObject WormholeFab;
+
+    public Transform WarpingHosts;
 }

@@ -20,14 +20,15 @@ public class Asteroid : Body {
              */
             Rad = Rad,
 
-            initPos = Trnsfrm.position,
+            initPos = Trnsfrm.localPosition,
             initVel = Vector3.zero,
-            initRot = Trnsfrm.rotation,
+            initRot = Trnsfrm.localRotation,
             initAVel = Quaternion.Euler((Random.value - 0.5f) * RotScl, (Random.value - 0.5f) * RotScl, (Random.value - 0.5f) * RotScl),
-            _Ar = ar,
+            //_Ar = ar,
             Host = this,
         };
         ar.Bodies.Add(Bdy);
+        Bdy._setArea(ar);
     }
 
 

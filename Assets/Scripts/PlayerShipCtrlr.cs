@@ -1,96 +1,63 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
-public class PlayerShipCtrlr : Body {
+public class PlayerShipCtrlr : Drone {
 
     public CameraControl CamCntrl;
+    public ShipHud UI;
 
-    public Transform Target;
-    public Station St;
-
-    public Vector3 Vel;
-    public Quaternion AVel = Quaternion.identity;
-
-
-    public float MaxVel = 5;
-    public float MaxSteer = 0.5f;
-
-
-    public float MaxAVel = 5;
-    public float MaxASteer = 0.5f;
-
-    public float ArriveEp = 0.5f;
-
-    // public float Rad = 0.2f;
-
-    public Sim.Drone Drn;
-
-    void Awake() {
-        //    Trnsfrm = transform;
-    }
 
     public override void init() {
-        var ar = GetComponentInParent<Sim.Area>();
-
-        var st = ar.GetComponentInChildren<Station>();
-        st.init();
-        init(st);
+        base.init();
+        Drn.initBehavior = Sim.Drone.BehaviorT.Player;
     }
-    public void init(Station st) {
-        // Debug.Log(" st  " + st + " st.Sm.Host  " + st.Sm.Host + "   st.Owner  " + st.Owner);
-        Debug.Assert(ReferenceEquals((st.Sm.Host as Station), st));
-        Drn.St = st.Sm;
-        Drn.Owner = st.Owner;
-        Drn.St.Dependants.Add(Drn);
 
-        Drn.Ai = st.Ai;
-        Drn.Target = null;
-
-        Drn._Behavior = Sim.Drone.BehaviorT.Player;
-
-        st.Bdy.Ar.addDrone(Drn);
-    }
-    void OnEnable() {
-
+    new void OnEnable() {
+        base.OnEnable();
         CamCntrl = FindObjectOfType<CameraControl>();
-        Trnsfrm = transform;
-        var sim = Simulation.Singleton;
-        Drn = new Sim.Drone() {
-            ArriveEp = ArriveEp,
-            MaxVel = MaxVel * sim.Glob_KineticScale,
-            MaxSteer = MaxSteer * sim.Glob_KineticScale * sim.Glob_AccelScale,
-            MaxAVel = MaxAVel * sim.Glob_KineticScale * sim.Glob_RotScale,
-            MaxASteer = MaxASteer * sim.Glob_KineticScale * sim.Glob_AccelScale * sim.Glob_RotScale,
-
-            Rad = Rad,
-
-            initPos = Trnsfrm.position,
-            initVel = Vel,
-            initRot = Trnsfrm.rotation,
-            initAVel = AVel,
-            Host = this,
-
-
-            MaxPower = 50,
-            Power = 10,
-        };
-
     }
 
-    void Update() {
 
-        if(Drn != null) {
-            var fd = Drn.fdSmooth(Simulation.Singleton);
+    public void onAreaChange( Sim.Area old) {
+        if(UI) {
 
-            Trnsfrm.position = fd.Pos;
-            Trnsfrm.rotation = fd.Rot;
-            Vel = fd.Vel;
-            AVel = fd.AVel;
-
-
+            UI.WarpButton.set(warpCallback, Drn.Ar != null);
         }
+        
+
+    }
+    List<PopupButton.Entry> warpCallback() {
+        var ret = new System.Collections.Generic.List<PopupButton.Entry>();
+        var _this = this;
+        if(Drn.Ar == null) return ret;
+        if( Drn.Ar.St != null && Drn.Ar.St.Ai == Drn.Ai) {
+
+            Debug.Log("wcb 1");
+            foreach(var a in Drn.Ai.TargetAreas) {
+                var ar = a.Ar;
+                ret.Add(new PopupButton.Entry() {
+                    Name = a.Ar.name,                 
+                    Callback = () => {
+                        if(_this == null) return;
+                        Drn.setWarpTarget(ar);
+                    }
+                });
+                Debug.Log(" set cb " + a.Ar + "    n " + a.Ar.name);
+            }
+        } else {
+            Debug.Log("wcb 2");
+            foreach(var s in Drn.AreaD.StationsInRange) {
+                ret.Add(new PopupButton.Entry() {
+                    Name = s.name,
+                    Callback = () => {
+                        if(_this == null) return;
+                        Drn.setWarpTarget(s.Ar);
+                    }
+                });
+            }
+        }
+        return ret;
     }
 
-  
 
 }

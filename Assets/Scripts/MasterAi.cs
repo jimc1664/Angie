@@ -41,6 +41,7 @@ namespace Sim {
             public float LastVisit = -1000;
 
             public int Count = 0;
+            public List<Station> StationsInRange = new List<Station>();
 
             /*
             public enum StatusE {
@@ -107,6 +108,7 @@ namespace Sim {
                 if(a.GetComponentInChildren<Asteroid>()) {
                     if( (st.transform.position - a.transform.position ).magnitude  > st.WarpRange ) continue;
                     var ad = new AreaDat() { Ar = a, };
+                    ad.StationsInRange.Add(st.Sm);
                     TargetAreas.Insert(Random.Range(0, TargetAreas.Count), ad );
                     Areas.Add(a, ad);
                 }

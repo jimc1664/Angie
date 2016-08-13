@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-
+using System.Runtime.CompilerServices;
 
 namespace Sim {
     public class Area : MonoBehaviour {
@@ -15,7 +15,8 @@ namespace Sim {
 
         public SortedDictionary<MasterAi,MasterAi.AreaDat> Occupiers = new SortedDictionary<MasterAi, MasterAi.AreaDat>( new MonoBehaviourComparer<MasterAi>() );
 
-
+        public int Seed = 0;
+        public float GenRoids = 0;
         
         public enum StatusE {
             Owned, 
@@ -23,19 +24,119 @@ namespace Sim {
             Contested,
             Unknown, 
         };
-        public StatusE Status = StatusE.Unknown, NStatus = StatusE.Unknown; 
+        public StatusE Status = StatusE.Unknown, NStatus = StatusE.Unknown;
 
+        static int Seeds = 0;
         void Awake() {
-
             //St = GetComponentInChildren<Station>();
+
+
+            if(Seed == 0)
+                Seed = Seeds++;
+
+            if(Roids.Count == 0 && GenRoids != 0) {
+
+
+                gen();
+            }
         }
 
         void Start() {
 
             Simulation.Singleton.Areas.Add(this);
-        }
 
+        }
+        public List<Asteroid> Roids;
+        void gen() {
+
+            foreach(var a in GetComponentsInChildren<Asteroid>())
+                DestroyImmediate(a.gameObject);
+                
+            Random.seed = Seed;
+            if(Seed == 0)
+                Random.seed = (int)System.DateTime.Now.Ticks;
+
+
+            if(GenRoids < 0) {
+                Random.seed = Seed - 2;
+                GenRoids = Random.value * (1 + Random.value);
+                GenRoids *= 10.0f;
+            }
+
+            float density = 1.3f * (1.0f + Math_JC.pow2(Random.value));
+            //  List<Asteroid> roids = new List<Asteroid>();
+            Roids.Clear();
+            for( float rc = GenRoids; rc > 0; ) {            
+                var go = new GameObject();
+                var a = go.AddComponent<Asteroid>();
+                var t = go.transform;
+                t.parent = transform;
+                
+
+                var mesh = Instantiate( StarGen.Singleton.RoidFabs[Random.Range(0, StarGen.Singleton.RoidFabs.Count)] );
+                var mt = mesh.transform;
+                mt.parent = t;
+
+                Vector3 scl = (new Vector3(Random.value, Random.value, Random.value)+ Vector3.one)  * 0.03f *  (0.2f+ Random.value );
+                mt.localScale = scl;
+
+                mt.localPosition = Vector3.zero;
+                t.localRotation = Random.rotation;
+
+                mt.GetComponent<MeshRenderer>().material = StarGen.Singleton.RoidMats[Random.Range(0, StarGen.Singleton.RoidMats.Count)];
+
+                var mf = mt.GetComponent<MeshFilter>();
+
+                var vrts = mf.sharedMesh.vertices;
+
+                Vector3 mid = Vector3.zero;
+                foreach(var v in vrts) mid += v;
+                mid /= vrts.Length;
+                mid.Scale(scl);
+                mt.localPosition = -mid;
+
+                float r = 0, mr = 0;
+                foreach(var v in vrts) {
+                    v.Scale(scl);
+                    float d = (v - mid).sqrMagnitude;
+                    r += d;
+                    mr = Mathf.Max(mr, d);
+                }
+                r = Mathf.Sqrt( r / vrts.Length );
+
+                a.Rad = Mathf.Sqrt(mr) *0.7f + r *0.3f;
+                rc -= r;
+                
+                for(float rm = 2 + 0.25f* Roids.Count; ;) {
+                    t.localPosition = Random.insideUnitSphere * a.Rad * Random.value * rm * density;
+                    foreach(var o in Roids) {
+
+                        if((o.transform.localPosition - t.localPosition).sqrMagnitude * 0.9f < Math_JC.pow2(a.Rad + o.Rad))
+                            goto label_breakContinue;
+                    }
+                    break;
+                    label_breakContinue:;
+                    rm += 1 + 0.5f * Roids.Count;
+                }
+
+                Roids.Add(a);
+
+                //rc = 0;
+            }
+        }
+        public bool Gen = false;
+        public bool GenAll = false;
         void OnDrawGizmos() {
+
+            if(GenAll) {
+                foreach(var a in FindObjectsOfType<Area>()) a.Gen = true;                
+                GenAll = false;
+            }
+            if(Gen) {
+                gen();
+                Gen = false;
+            }
+
             var c = Color.gray;
 
             c.a *= 0.5f;
@@ -66,9 +167,32 @@ namespace Sim {
 
 
         public void addDrone(Drone d) {
-            Debug.Assert(d._Ar == null);
-            d._Ar = this;
+            Debug.Assert(d.Ar == null);
 
+            if(d.Host == null) {
+                global::Drone gd;
+                switch(d.Behavior) {
+                    case Drone.BehaviorT.Mine:
+                        gd = Instantiate(Spawnables.Singleton.MiningShip).GetComponent<global::Drone>();
+                        break;
+                    case Drone.BehaviorT.Hunt:
+                        gd = Instantiate(Spawnables.Singleton.FighterDrn).GetComponent<global::Drone>();
+                        break;
+                    case Drone.BehaviorT.Player:
+                        gd = Instantiate(Spawnables.Singleton.PlayerShip).GetComponent<global::Drone>();
+                        break;
+                    default:
+                        Debug.LogError("unhandled");
+                        return;
+                }
+                
+                gd.init(d );
+
+            }
+            d._setArea(this);
+            //d.fd(1-
+            d.Host.transform.parent = transform;
+            //d.Host.transform.localPosition = 
 
             MasterAi.AreaDat ad = null;
             bool enemy = false;
@@ -100,6 +224,7 @@ namespace Sim {
                 }
                 Occupiers.Add(d.Ai, ad);
             }
+            d.AreaD = ad;
 
             if(enemy) {
               //  ad.Status = MasterAi.AreaDat.StatusE.Contested;
@@ -120,9 +245,11 @@ namespace Sim {
                 NStatus = StatusE.Owned;
         }
         public void remDrone(Drone d) {
-            Debug.Assert(d._Ar == this);
+            Debug.Assert(d.Ar == this);
             Drones.Remove(d);
-            d._Ar = null;
+            d._setArea(null);
+            d.AreaD = null;
+            d.Host.transform.parent = World.Singleton.WarpingHosts;
 
             MasterAi.AreaDat ad;
             if(Occupiers.TryGetValue(d.Ai, out ad)) {
@@ -145,10 +272,65 @@ namespace Sim {
         }
         public List<Drone> Drones;
         public List<Body> Bodies;
+        public List<Wormhole> WormHs;
+
+
+        //i am relying on this function being inlined....   close as i figure i can get to proper specilisation on c#
+        void avoidanceAndCollison(ref Simulation.FrameCntx fc, Body b1, Body b2,
+            Vector3 p1, Vector3 p2, Vector3 vel1, Vector3 vel2, Vector3 p1_2, Vector3 p2_2, float mm, float m1, float m2, float ms1, float ms2, float avR,
+            ref Vector3 d1Cp1, ref Vector3 d1Cp2, ref Vector3 d2Cp1, ref Vector3 d2Cp2, ref Vector3 d1Av, ref Vector3 d2Av
+            ) {
+
+            var vec = p1 - p2;
+            var mag = (vec).sqrMagnitude;
+            //var mm = 1.0f + Mathf.Abs((d1.fd(fc.FrameInd).Vel / d1.MaxVel).sqrMagnitude - (d2.fd(fc.FrameInd).Vel / d2.MaxVel).sqrMagnitude);
+
+            float ep1 = (b1.Rad + b2.Rad);
+            float avoidEp = 1.5f * mm;
+            avoidEp = ep1 + (avR * 2.0f + 0.2f) * avoidEp;
+            if(mag < Mathf.Pow(avoidEp, 2)) {
+
+                mag = Mathf.Sqrt(mag);
+                vec /= mag + Mathf.Epsilon;
+                var noise = Random.onUnitSphere * 0.05f;
+                vec += noise;
+
+                // Vector3 p1_2 = d1.fd(fc.FrameInd).Pos + d1.fd(fc.FrameInd).Vel * fc.Delta, p2_2 = d2.fd(fc.FrameInd).Pos + d2.fd(fc.FrameInd).Vel * fc.Delta;
+                var v2 = p1_2 - p2_2;
+                if(v2.sqrMagnitude < Mathf.Pow(ep1, 2)) {
+                    float v2m = v2.magnitude + Mathf.Epsilon;  //force non zero
+                    v2 = v2 * (ep1 - v2m) / v2m;
+                    v2 += noise;
+                    float bnc = 0.3f;
+
+                    //float mass = d1.Rad + d2.Rad, ms1 = d2.Rad / mass, ms2 = d1.Rad / mass;
+                    //d1.CollisonPush2 += v2 * (1 - bnc) * ms1;
+                    //d2.CollisonPush2 -= v2 * (1 - bnc) * ms2;
+                    d1Cp2 += v2 * (1 - bnc) * ms1;
+                    d2Cp2 -= v2 * (1 - bnc) * ms2;
+                    v2 = v2 * (bnc / fc.Delta);
+
+                    //d1.CollisonPush1 += (v2 - d1.fd(fc.FrameInd).Vel) * 0.8f * ms1;
+                    //d2.CollisonPush1 -= (v2 - d2.fd(fc.FrameInd).Vel) * 0.8f * ms2;
+                    d1Cp1 += (v2 - vel1) * 0.8f * ms1;
+                    d2Cp1 -= (v2 - vel2) * 0.8f * ms2;
+                }
+
+                vec *= (avoidEp - mag) * 0.5f;
+                vec *= 2.0f;
+                //var m1 = d1.fd(fc.FrameInd).Vel.sqrMagnitude / (d1.MaxVel * d1.MaxVel);
+                //var m2 = d2.fd(fc.FrameInd).Vel.sqrMagnitude / (d2.MaxVel * d2.MaxVel);
+                //float mt = 1 + m1 + m2;
+                //m1 = (1 + m1) / mt;
+                //m2 = (1 + m2) / mt;
+                //d1.Avoidance += vec * m1;
+                //d2.Avoidance -= vec * m2;
+                d1Av+= vec * m1;
+                d2Av -= vec * m2;
+            }
+        }
 
         public void proc(ref Simulation.FrameCntx fc) {
-
-
             if(St != null) {
                 /*foreach( var s in GameObject.FindObjectsOfType<global::Station>() )
                     Debug.Log("   s  " + s + "   h " + s.Sm.Host + "  hc "+ s.Sm.GetHashCode() );
@@ -164,73 +346,95 @@ namespace Sim {
                 var p1 = d1.fd(fc.FrameInd).Pos + d1.fd(fc.FrameInd).Vel * 0.25f;
                 for(int j = i; j-- > 0;) {
                     var d2 = Drones[j];
-                    var p2 = d2.fd(fc.FrameInd).Pos + d2.fd(fc.FrameInd).Vel * 0.25f; ;
-
-                    var vec = p1 - p2;
-                    var mag = (vec).sqrMagnitude;
-
+                    var p2 = d2.fd(fc.FrameInd).Pos + d2.fd(fc.FrameInd).Vel * 0.25f;
+                    var mm = 1.0f + Mathf.Abs((d1.fd(fc.FrameInd).Vel / d1.MaxVel).sqrMagnitude - (d2.fd(fc.FrameInd).Vel / d2.MaxVel).sqrMagnitude);
+                    Vector3 p1_2 = d1.fd(fc.FrameInd).Pos + d1.fd(fc.FrameInd).Vel * fc.Delta, p2_2 = d2.fd(fc.FrameInd).Pos + d2.fd(fc.FrameInd).Vel * fc.Delta;
+                    float mass = d1.Rad + d2.Rad, ms1 = d2.Rad / mass, ms2 = d1.Rad / mass;
                     var m1 = d1.fd(fc.FrameInd).Vel.sqrMagnitude / (d1.MaxVel * d1.MaxVel);
                     var m2 = d2.fd(fc.FrameInd).Vel.sqrMagnitude / (d2.MaxVel * d2.MaxVel);
-                    var mm = 1.5f - Vector3.Dot(d1.fd(fc.FrameInd).Vel / d1.MaxVel, d2.fd(fc.FrameInd).Vel / d2.MaxVel) * 0.5f;
-                    float avoidEp = 3.0f * mm;
-                    avoidEp = avoidEp * (d1.Rad + d2.Rad);
-                    if(mag < Mathf.Pow(avoidEp, 2)) {
-
-                        mag = Mathf.Sqrt(mag);
-
-                        //var mod = mag;
-                        vec /= mag;
-                        // vec.Normalize();
-                        vec += Random.onUnitSphere * 0.05f;
-
-                        vec *= (avoidEp - mag) * 0.5f;
-
-                        //vec.Scale(vec);
-                        float mt = 1 + m1 + m2;
-                        d1.Avoidance += vec * (1 + m1) / mt;
-                        d2.Avoidance -= vec * (1 + m2) / mt;
-                    }
+                    float mt = 1 + m1 + m2;
+                    m1 = (1 + m1) / mt  *ms1;
+                    m2 = (1 + m2) / mt  *ms2;
+                    float avR = Mathf.Max(d1.Rad, d2.Rad);
+                    avoidanceAndCollison( ref fc, d1, d2, p1, p2, d1.fd(fc.FrameInd).Vel, d2.fd(fc.FrameInd).Vel, 
+                        p1_2, p2_2, mm, m1, m2, ms1, ms2, avR, ref d1.CollisonPush1, ref d2.CollisonPush1, ref d1.CollisonPush2, ref d2.CollisonPush2, ref d1.Avoidance, ref d2.Avoidance);
                 }
 
                 foreach(var b in Bodies) {
                     var p2 = b.fd(fc.FrameInd).Pos;
 
-                    var vec = p1 - p2;
-                    var mag = (vec).sqrMagnitude;
-
-                    var m1 = d1.fd(fc.FrameInd).Vel.sqrMagnitude / (d1.MaxVel * d1.MaxVel);
-                    var m2 = 0;
-                    var mm = 1.5f;// - Vector3.Dot(d1.fd(fc.FrameInd).Vel / d1.MaxVel, d2.fd(fc.FrameInd).Vel / d2.MaxVel) * 0.5f;
-                    float avoidEp = 3.0f * mm;
-                    avoidEp = avoidEp * (d1.Rad + b.Rad);
-                    if(mag < Mathf.Pow(avoidEp, 2)) {
-
-                        mag = Mathf.Sqrt(mag);
-
-                        //var mod = mag;
-                        vec /= mag;
-                        // vec.Normalize();
-                        vec += Random.onUnitSphere * 0.05f;
-
-                        vec *= (avoidEp - mag);
-
-                        //vec.Scale(vec);
-                        float mt = 1 + m1 + m2;
-                        d1.Avoidance += vec * (1 + m1) / mt;
-                        //d2.Avoidance -= vec * (1 + m2) / mt;
-                    }
+                    var mm = 1.0f + (d1.fd(fc.FrameInd).Vel / d1.MaxVel).sqrMagnitude;
+                    Vector3 p1_2 = d1.fd(fc.FrameInd).Pos + d1.fd(fc.FrameInd).Vel * fc.Delta, p2_2 = p2;
+                    float ms1 = 1, ms2 = 0;
+                    float m1 = d1.fd(fc.FrameInd).Vel.sqrMagnitude / (d1.MaxVel * d1.MaxVel), m2 = 0, mt = 1 + m1 + m2;
+                    m1 = (1 + m1) / mt;
+                    Vector3 dummy = Vector3.zero;
+                    avoidanceAndCollison(ref fc, d1, b, p1, p2, d1.fd(fc.FrameInd).Vel, dummy,
+                        p1_2, p2_2, mm, m1, m2, ms1, ms2, d1.Rad, ref d1.CollisonPush1, ref dummy, ref d1.CollisonPush2, ref dummy, ref d1.Avoidance, ref dummy);
                 }
             }
 
+            for(int i = WormHs.Count; i-- > 0;) {
+                var wh = WormHs[i];
+
+                if(wh.State <= Wormhole.StateE.Waiting) {
+                    var p1 = wh.fd(fc.FrameInd).Pos + wh.fd(fc.FrameInd).Vel * fc.Delta;
+                    Vector3 av = Vector3.zero, cp1 = Vector3.zero, cp2 = Vector3.zero;
+                    foreach(var d in Drones) {
+                        if(d.Wormhole == wh) continue;
+
+                        var p2 = d.fd(fc.FrameInd).Pos + d.fd(fc.FrameInd).Vel * 0.25f;
+                        var mm = 1.0f + (d.fd(fc.FrameInd).Vel / d.MaxVel).sqrMagnitude;
+                        Vector3 p1_2 = p1, p2_2 = d.fd(fc.FrameInd).Pos + d.fd(fc.FrameInd).Vel * fc.Delta;
+                        float ms1 = 1, ms2 = 0;
+                        float m1 = 1, m2 = 0;
+                        Vector3 dummy = Vector3.zero;
+                        avoidanceAndCollison(ref fc, wh, d, p1, p2, wh.fd(fc.FrameInd).Vel, dummy,
+                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                    }
+                    foreach(var b in Bodies) {
+                        var p2 = b.fd(fc.FrameInd).Pos;
+                        var mm = 1.0f;
+                        Vector3 p1_2 = p1, p2_2 = p2;
+                        float ms1 = 1, ms2 = 0;
+                        float m1 = 1, m2 = 0;
+                        Vector3 dummy = Vector3.zero;
+                        avoidanceAndCollison(ref fc, wh, b, p1, p2, wh.fd(fc.FrameInd).Vel, dummy,
+                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                    }
+                    foreach(var w2 in WormHs) {  //todo - do this properly...
+                        if(ReferenceEquals(wh, w2)) continue;
+                        var p2 = w2.fd(fc.FrameInd).Pos;
+                        var mm = 1.0f;
+                        Vector3 p1_2 = p1, p2_2 = p2;
+                        float mass = wh.Rad + w2.Rad, ms1 = w2.Rad / mass, ms2 = wh.Rad / mass;
+                        Vector3 dummy = Vector3.zero;
+                        ms1 *= 0.25f;
+                        avoidanceAndCollison(ref fc, wh, w2, p1, p2, wh.fd(fc.FrameInd).Vel, w2.fd(fc.FrameInd).Vel,
+                            p1_2, p2_2, mm, ms1, ms2, ms1, ms2, Mathf.Max( wh.Rad, w2.Rad ), ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                    }
+                    av *= 0.1f;
+                    wh.update(ref fc, av, cp1, cp2);
+                } else if( wh.State == Wormhole.StateE.Deforming ) {
+                    wh.StateMd += fc.Delta;
+                    if(wh.StateMd > 1.0f) {
+                        WormHs.RemoveAt(i);
+                        Destroy(wh.Host.gameObject);
+                        Destroy(wh);
+                    }
+                }
+
+            }
+
             foreach(var b in Bodies) {
-                Debug.Assert(b._Ar == this, "err");
+                Debug.Assert(b.Ar == this, "err");
                 b.update(ref fc);
                 b.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     b.update(ref a);
                 });
             }
             foreach(var d in Drones) {
-                Debug.Assert(d._Ar == this, "err");
+                Debug.Assert(d.Ar == this, "err");
                 d.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     if(NStatus == StatusE.Contested && NStatus != Status)
                         d.poke(ref a);

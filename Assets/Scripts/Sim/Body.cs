@@ -39,7 +39,14 @@ namespace Sim {
 
         public float Rad = 0.2f;
 
-        public Area _Ar;
+        private Area _Ar;
+        public void _setArea(Area ar) {
+            var o = _Ar;
+            _Ar = ar;
+            var plyr = Host as PlayerShipCtrlr;
+            if(plyr != null) plyr.onAreaChange( o );  ///ewww remove todo            
+        }
+
         public Area Ar {
             get { return _Ar; }
             private set {
@@ -55,8 +62,6 @@ namespace Sim {
         [SerializeField]
         protected FrameDat Fd1, Fd2;
 
-        public Vector3 Avoidance;
-
         public Vector3 initVel { set { Fd1.Vel = Fd2.Vel = value; } }
         public Vector3 initPos { set { Fd1.Pos = Fd2.Pos = value; } }
         public Quaternion initRot {
@@ -67,17 +72,23 @@ namespace Sim {
         public Quaternion initAVel { set { Fd1.AVel = Fd2.AVel = value; } }
 
         public FrameDat fd(int fi) {
-            if((fi & 1) == 0)
+            if((fi & 1) != 0)
                 return Fd1;
             else
                 return Fd2;
         }
-
         public FrameDat fdSmooth(Simulation s) {
             if((s.FrameInd & 1) == 0)
                 return fdSub(s, Fd1, ref Fd2);
             else
                 return fdSub(s, Fd2, ref Fd1);
+        }
+        public void fd_Sync(int fi) {
+            if((fi & 1) != 0)
+                Fd2 = Fd1;
+            else
+                Fd1 = Fd2;
+
         }
         FrameDat fdSub(Simulation s, FrameDat a, ref FrameDat b) {
             var lrp = 1.0f - s.Timer / s.Step;
@@ -87,6 +98,7 @@ namespace Sim {
             a.AVel = Quaternion.Slerp(a.AVel, b.AVel, lrp);
             return a;
         }
+
 
 
         public void update(ref Simulation.FrameCntx cntx) {
@@ -122,7 +134,7 @@ public class Body : SimObj {
 
 
 
-    void OnEnable() {
+    protected void OnEnable() {
         Trnsfrm = transform;
     }
     protected Transform Trnsfrm;
@@ -132,8 +144,8 @@ public class Body : SimObj {
         if(Bdy != null) {
             var fd = Bdy.fdSmooth(Simulation.Singleton);
 
-           // Trnsfrm.position = fd.Pos;
-            Trnsfrm.rotation = fd.Rot;
+            Trnsfrm.localPosition = fd.Pos;
+            Trnsfrm.localRotation = fd.Rot;
 
 
         }
