@@ -5,6 +5,8 @@ using System.Runtime.CompilerServices;
 namespace Sim {
     public class Area : MonoBehaviour {
 
+
+        public Transform Vis;
         public float Radius = 10.0f;
 
         //public Station St;
@@ -30,7 +32,13 @@ namespace Sim {
         void Awake() {
             //St = GetComponentInChildren<Station>();
 
-
+            Vis = new GameObject().transform;
+            Vis.transform.parent = transform;
+            Vis.gameObject.SetActive(false);
+            Vis.transform.localPosition = Vector3.zero;
+            Vis.transform.localRotation = Quaternion.identity;
+            Vis.transform.localScale = Vector3.one;
+            
             if(Seed == 0)
                 Seed = Seeds++;
 
@@ -165,10 +173,9 @@ namespace Sim {
             Gizmos.DrawWireSphere(transform.position, Radius);
         }
 
+        public bool IsVisible = false;
 
-        public void addDrone(Drone d) {
-            Debug.Assert(d.Ar == null);
-
+        void getHost(Drone d) {
             if(d.Host == null) {
                 global::Drone gd;
                 switch(d.Behavior) {
@@ -185,14 +192,35 @@ namespace Sim {
                         Debug.LogError("unhandled");
                         return;
                 }
-                
-                gd.init(d );
+
+                gd.init(d);
 
             }
+            d.Host.transform.parent = Vis;
+        }
+
+        public void addDrone(Drone d) {
+            Debug.Assert(d.Ar == null);
+
+            if(d.Host as PlayerShipCtrlr) {
+                Vis.gameObject.SetActive( IsVisible = true );
+
+                foreach(var od in Drones) getHost(od);
+
+                foreach(var w in WormHs)
+                    if(w.Host == null)
+                        w.initVis();
+            }
+
+            if(IsVisible) {
+                getHost(d);
+            } else if( d.Host) {
+                //destroy host..
+                d.Host.transform.parent = Vis;
+            }
+
+
             d._setArea(this);
-            //d.fd(1-
-            d.Host.transform.parent = transform;
-            //d.Host.transform.localPosition = 
 
             MasterAi.AreaDat ad = null;
             bool enemy = false;
@@ -249,7 +277,14 @@ namespace Sim {
             Drones.Remove(d);
             d._setArea(null);
             d.AreaD = null;
-            d.Host.transform.parent = World.Singleton.WarpingHosts;
+
+            if( d.Host ) 
+                d.Host.transform.parent = World.Singleton.WarpingHosts;
+
+            if(d.Host as PlayerShipCtrlr) {
+                
+                Vis.gameObject.SetActive(IsVisible = false);
+            }
 
             MasterAi.AreaDat ad;
             if(Occupiers.TryGetValue(d.Ai, out ad)) {
@@ -270,6 +305,15 @@ namespace Sim {
             else
                 NStatus = StatusE.Owned;
         }
+
+        public void addBody( Body b) {
+            Bodies.Add(b);
+            Debug.Assert(b.Ar == null);
+            b._setArea(this);
+            if(b.Host)
+                b.Host.transform.parent = Vis;
+        }
+
         public List<Drone> Drones;
         public List<Body> Bodies;
         public List<Wormhole> WormHs;
@@ -298,11 +342,12 @@ namespace Sim {
                 // Vector3 p1_2 = d1.fd(fc.FrameInd).Pos + d1.fd(fc.FrameInd).Vel * fc.Delta, p2_2 = d2.fd(fc.FrameInd).Pos + d2.fd(fc.FrameInd).Vel * fc.Delta;
                 var v2 = p1_2 - p2_2;
                 if(v2.sqrMagnitude < Mathf.Pow(ep1, 2)) {
-                    float v2m = v2.magnitude + Mathf.Epsilon;  //force non zero
-                    v2 = v2 * (ep1 - v2m) / v2m;
+                    float v2m = v2.magnitude;
+                    var v2n = v2 / (v2m + Mathf.Epsilon);
+                    v2 =  (ep1 - v2m) *v2n;  //force non zero
                     v2 += noise;
                     float bnc = 0.3f;
-
+                    v2 *= 0.75f;
                     //float mass = d1.Rad + d2.Rad, ms1 = d2.Rad / mass, ms2 = d1.Rad / mass;
                     //d1.CollisonPush2 += v2 * (1 - bnc) * ms1;
                     //d2.CollisonPush2 -= v2 * (1 - bnc) * ms2;
@@ -312,8 +357,11 @@ namespace Sim {
 
                     //d1.CollisonPush1 += (v2 - d1.fd(fc.FrameInd).Vel) * 0.8f * ms1;
                     //d2.CollisonPush1 -= (v2 - d2.fd(fc.FrameInd).Vel) * 0.8f * ms2;
-                    d1Cp1 += (v2 - vel1) * 0.8f * ms1;
-                    d2Cp1 -= (v2 - vel2) * 0.8f * ms2;
+
+                    var velDif = vel1 - vel2;
+                   // Vector3.Reflect( vel1 /v1m, v2n) * v1m ;
+                    d1Cp1 += (velDif - vel1 ) * 0.8f * ms1;
+                    d2Cp1 += (-velDif - vel2 ) * 0.8f * ms2;
                 }
 
                 vec *= (avoidEp - mag) * 0.5f;
@@ -335,7 +383,7 @@ namespace Sim {
                 /*foreach( var s in GameObject.FindObjectsOfType<global::Station>() )
                     Debug.Log("   s  " + s + "   h " + s.Sm.Host + "  hc "+ s.Sm.GetHashCode() );
                 Debug.Log("St  " + St + "   h " + St.Host + "  hc " + St.GetHashCode());*/
-                St.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
+                St.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     St.updateSt(ref a);
                 });
             }
@@ -357,7 +405,7 @@ namespace Sim {
                     m2 = (1 + m2) / mt  *ms2;
                     float avR = Mathf.Max(d1.Rad, d2.Rad);
                     avoidanceAndCollison( ref fc, d1, d2, p1, p2, d1.fd(fc.FrameInd).Vel, d2.fd(fc.FrameInd).Vel, 
-                        p1_2, p2_2, mm, m1, m2, ms1, ms2, avR, ref d1.CollisonPush1, ref d2.CollisonPush1, ref d1.CollisonPush2, ref d2.CollisonPush2, ref d1.Avoidance, ref d2.Avoidance);
+                        p1_2, p2_2, mm, m1, m2, ms1, ms2, avR, ref d1.CollisonPush1, ref d1.CollisonPush2, ref d2.CollisonPush1, ref d2.CollisonPush2, ref d1.Avoidance, ref d2.Avoidance);
                 }
 
                 foreach(var b in Bodies) {
@@ -370,7 +418,7 @@ namespace Sim {
                     m1 = (1 + m1) / mt;
                     Vector3 dummy = Vector3.zero;
                     avoidanceAndCollison(ref fc, d1, b, p1, p2, d1.fd(fc.FrameInd).Vel, dummy,
-                        p1_2, p2_2, mm, m1, m2, ms1, ms2, d1.Rad, ref d1.CollisonPush1, ref dummy, ref d1.CollisonPush2, ref dummy, ref d1.Avoidance, ref dummy);
+                        p1_2, p2_2, mm, m1, m2, ms1, ms2, d1.Rad, ref d1.CollisonPush1, ref d1.CollisonPush2, ref dummy, ref dummy, ref d1.Avoidance, ref dummy);
                 }
             }
 
@@ -390,7 +438,7 @@ namespace Sim {
                         float m1 = 1, m2 = 0;
                         Vector3 dummy = Vector3.zero;
                         avoidanceAndCollison(ref fc, wh, d, p1, p2, wh.fd(fc.FrameInd).Vel, dummy,
-                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref cp2, ref dummy, ref dummy, ref av, ref dummy);
                     }
                     foreach(var b in Bodies) {
                         var p2 = b.fd(fc.FrameInd).Pos;
@@ -400,7 +448,7 @@ namespace Sim {
                         float m1 = 1, m2 = 0;
                         Vector3 dummy = Vector3.zero;
                         avoidanceAndCollison(ref fc, wh, b, p1, p2, wh.fd(fc.FrameInd).Vel, dummy,
-                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                            p1_2, p2_2, mm, m1, m2, ms1, ms2, wh.Rad, ref cp1, ref cp2, ref dummy, ref dummy, ref av, ref dummy);
                     }
                     foreach(var w2 in WormHs) {  //todo - do this properly...
                         if(ReferenceEquals(wh, w2)) continue;
@@ -409,9 +457,9 @@ namespace Sim {
                         Vector3 p1_2 = p1, p2_2 = p2;
                         float mass = wh.Rad + w2.Rad, ms1 = w2.Rad / mass, ms2 = wh.Rad / mass;
                         Vector3 dummy = Vector3.zero;
-                        ms1 *= 0.25f;
+                     //   ms1 *= 0.25f;
                         avoidanceAndCollison(ref fc, wh, w2, p1, p2, wh.fd(fc.FrameInd).Vel, w2.fd(fc.FrameInd).Vel,
-                            p1_2, p2_2, mm, ms1, ms2, ms1, ms2, Mathf.Max( wh.Rad, w2.Rad ), ref cp1, ref dummy, ref cp2, ref dummy, ref av, ref dummy);
+                            p1_2, p2_2, mm, ms1, ms2, ms1, ms2, Mathf.Max( wh.Rad, w2.Rad ), ref cp1, ref cp2, ref dummy, ref dummy, ref av, ref dummy);
                     }
                     av *= 0.1f;
                     wh.update(ref fc, av, cp1, cp2);
@@ -419,7 +467,8 @@ namespace Sim {
                     wh.StateMd += fc.Delta;
                     if(wh.StateMd > 1.0f) {
                         WormHs.RemoveAt(i);
-                        Destroy(wh.Host.gameObject);
+                        if( wh.Host )
+                            Destroy(wh.Host.gameObject);
                         Destroy(wh);
                     }
                 }
@@ -429,13 +478,14 @@ namespace Sim {
             foreach(var b in Bodies) {
                 Debug.Assert(b.Ar == this, "err");
                 b.update(ref fc);
-                b.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
+                
+                b.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     b.update(ref a);
                 });
             }
             foreach(var d in Drones) {
                 Debug.Assert(d.Ar == this, "err");
-                d.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
+                d.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     if(NStatus == StatusE.Contested && NStatus != Status)
                         d.poke(ref a);
                     d.update(ref a);
@@ -445,10 +495,11 @@ namespace Sim {
 
             for( int i = Drones.Count; i-->0; ) {
                 var d = Drones[i];
-                d.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
+                d.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     if( !d.updatePost(ref a)) {
                         remDrone(d);
-                        Destroy(d.Host.gameObject);
+                        if( d.Host )
+                            Destroy(d.Host.gameObject);
                         d.St.Dependants.Remove(d);
                         if(d.Behavior == Drone.BehaviorT.Hunt)
                             d.St.FighterCnt--;
@@ -459,7 +510,7 @@ namespace Sim {
                 });
             }
             if(St != null)
-                St.Host.foo(ref fc, (ref Simulation.FrameCntx a) => {
+                St.foo(ref fc, (ref Simulation.FrameCntx a) => {
                     St.updateSt(ref a);
                 });
             //St.updateSt(ref fc);

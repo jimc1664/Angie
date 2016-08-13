@@ -3,8 +3,8 @@ using System.Collections;
 
 public class SimObj : MonoBehaviour {
 
-    public delegate void FooDlg(ref Simulation.FrameCntx fc);
-    public void foo(ref Simulation.FrameCntx fc,  FooDlg act){
+    
+    public void foo(ref Simulation.FrameCntx fc,  Sim.Body.FooDlg act){
         act(ref fc);
     }
 

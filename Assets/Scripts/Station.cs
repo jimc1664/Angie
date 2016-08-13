@@ -317,8 +317,7 @@ public class Station : Body {
             //_Ar = ar,
             Host = this,
         };
-        ar.Bodies.Add(Bdy);
-        Bdy._setArea(ar);
+        ar.addBody(Bdy);
 
 
 

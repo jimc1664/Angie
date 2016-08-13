@@ -100,10 +100,15 @@ namespace Sim {
             return true;
         }
         public void setWarpTarget(Area to) {
+
+            
+            Debug.Assert(to != Ar);
             Target = null;
             WarpTo = to;
             WarpRdy = 0;
             _State = StateT.PrepWarp;
+
+            Debug.Log(  name+ " of "+Owner.name + "  warping too " + WarpTo );
         }
         public void enterWarp(ref Simulation.FrameCntx cntx) {
             WarpFrom = Ar;
@@ -140,7 +145,7 @@ namespace Sim {
             Target = null;
             switch(Behavior) {
                 case BehaviorT.Mine:
-                    if(Mins > MaxMins * 0.5f || (St.Ar == Ar && Mins > 0)) {
+                    if(Mins > MaxMins * 0.9f || (St.Ar == Ar && Mins > 0)) {
                         if(St.Ar == Ar) {
                             Target = St;
                             _State = StateT.Mine;
@@ -152,9 +157,12 @@ namespace Sim {
                         }
                     } else {
                         Asteroid[] trgs;
-                        trgs = Ar.GetComponentsInChildren<Asteroid>();
+                        trgs = Ar.GetComponentsInChildren<Asteroid>( true );
                         if(trgs.Length == 0) {
-                            setWarpTarget(Ai.getTargetArea());
+                            if(Ar == St.Ar)
+                                setWarpTarget(Ai.getTargetArea());
+                            else
+                                setWarpTarget( St.Ar );
 
                             return true;
                         } else {
@@ -235,7 +243,6 @@ namespace Sim {
 
              return false; */
         }
-
         float act_Sub_Arrive(ref DroneCntx cntx, float ep) {
 
             Vector3 seekEp = Target.fd(cntx.FrameInd).Pos + Target.fd(cntx.FrameInd).Vel * 0.5f;
@@ -284,7 +291,6 @@ namespace Sim {
 
             return false;
         }
-
         bool act_Attack(ref DroneCntx cntx) {
             if(Target == null || Target.Ar != Ar) { //or is invalid...
 
@@ -328,7 +334,6 @@ namespace Sim {
 
             return false;
         }
-
         bool act_PilotCtrl(ref DroneCntx cntx) {
             PlayerShipCtrlr ctrlr = Host as PlayerShipCtrlr;
 
@@ -337,6 +342,143 @@ namespace Sim {
 
             cntx.DesVel += ctrlr.CamCntrl.FlyInput * MaxVel;
 
+            return false;
+        }
+        bool act_PrepWarp(ref Simulation.FrameCntx fc, ref DroneCntx cntx) {
+
+
+            var warp = cntx.EffPos - (Random.insideUnitSphere * 0.1f);
+            var wm = warp.sqrMagnitude;
+
+
+            if(Wormhole == null) {
+                var v = warp.normalized;
+
+                Vector3 wVec = (WarpTo.transform.position - Ar.transform.position).normalized;
+
+                Wormhole = new Wormhole() {
+                    initPos = v * Ar.Radius,
+                    initRot = Quaternion.LookRotation(wVec, cntx.DesUp),
+                    Rad = 0.25f + Rad * 2.0f,
+                    Dir = wVec,
+                };
+                Wormhole.init(Ar);
+            }
+
+            if(Wormhole != null) {
+                var v = Wormhole.fd(cntx.FrameInd).Pos - cntx.EffPos;
+                if(Wormhole.State <= Wormhole.StateE.Forming)
+                    v -= Wormhole.Dir * Rad;
+                else
+                    v += Wormhole.Dir * Rad;
+
+                cntx.DesVel = v * 2;
+                var vm = v.magnitude;
+                if(vm < Rad * 4) {
+                    if(vm < Rad * 2) {
+                        cntx.DesDir = Wormhole.Dir;
+                        WarpRdy = 1;
+                    } else
+                        WarpRdy = 1 - vm / Rad * 2;
+
+                    if(Wormhole.State >= Wormhole.StateE.Forming)
+                        if(Wormhole.State == Wormhole.StateE.Warping) {
+
+                        } else
+                            WarpRdy = Vector3.Dot(cntx.DesDir, cntx.ODesDir);
+
+                    if(Ws == null)
+                        Ws = St.requestWarp(this, WarpTo);
+                } else
+                    WarpRdy = 0;
+
+            } else {
+                Debug.LogError("old...");
+                if(wm > Mathf.Pow(Ar.Radius * 0.95f, 2)) {
+                    var v = WarpTo.transform.position - Ar.transform.position;
+                    if(v.sqrMagnitude > 0.01f)
+                        cntx.DesDir = v.normalized;
+                }
+
+                float arr = Ar.Radius * 1.05f;
+                if(wm < Mathf.Pow(arr, 2)) {
+                    wm = Mathf.Sqrt(wm);
+                    cntx.DesVel += warp * (arr - wm) / wm;
+                    WarpRdy = 0;
+                } else {
+
+                    WarpRdy = Mathf.Max(Vector3.Dot(cntx.DesDir, cntx.ODesDir), 0);
+                    WarpRdy = 0.5f;
+                    if(WarpRdy > 0.1f) {
+                        if(St != null) {
+                            if(Ws == null)
+                                Ws = St.requestWarp(this, WarpTo);
+                        } else if(WarpRdy > 0.9f) {      ///beacon stuff begone...
+                            //Bcn.warp(this, WarpTo);
+                            enterWarp(ref fc);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        bool act_Warping(ref DroneCntx cntx, ref FrameDat n) {
+
+            Vector3 vec = (WarpTo.transform.position - WarpFrom.transform.position);
+            var mag = Mathf.Pow(vec.sqrMagnitude + 1, 0.3333f);
+
+            vec.Normalize();
+
+            if(Wormhole == null) {
+                Wormhole = new Wormhole() {
+                    initPos = -(vec + Random.insideUnitSphere * 0.3f) * WarpTo.Radius,
+                    initRot = Quaternion.LookRotation(-vec, cntx.DesUp),
+                    Rad = 0.25f + Rad * 2.0f,
+                    Dir = -vec,
+                };
+                Wormhole.init(WarpTo);
+            }
+
+            Power -= cntx.Delta * 2;
+            var v1 = WarpFrom.transform.position + vec * WarpFrom.Radius;
+            var v2 = WarpTo.transform.position - vec * WarpTo.Radius;
+            Debug.DrawLine(v1, v2, Color.cyan);
+
+            switch(Wormhole.State) {
+                case Wormhole.StateE.Hypothetical:
+                    WarpRdy += cntx.Delta / mag;
+                    if(WarpRdy >= 1) {
+                        Wormhole.State = Wormhole.StateE.Forming;
+                        Wormhole.StateMd = 0;
+                        WarpRdy = 1;
+
+                        var whh = Wormhole.Host as global::Wormhole;
+                        if(whh != null)
+                            whh.Vis.gameObject.SetActive(true);
+                    }
+                    n.Pos = Vector3.Lerp(v1, v2, 0.1f + WarpRdy * 0.8f);
+                    n.Rot = Quaternion.LookRotation(vec, cntx.DesUp);
+                    return true;
+                case Wormhole.StateE.Forming:
+                    Wormhole.StateMd += cntx.Delta * 2;
+                    if(Wormhole.StateMd > 1) {
+                        cntx.Sim.DSwap.Add(new Simulation.DroneSwap() { Dr = this, A = Simulation.Singleton.WarpingDrones, Ar = WarpTo, B = WarpTo.Drones });
+                        //Debug.Log("swap? "+cntx.FrameInd );
+                        n.Pos = Wormhole.fd(cntx.FrameInd).Pos;
+                        n.Vel = vec * MaxVel * 0.1f;
+                        n.AVel = Quaternion.identity;
+
+                        WarpFrom = WarpTo = null;
+                        _State = StateT.Idle;
+
+                        Wormhole.State = Wormhole.StateE.Deforming;
+                        Wormhole.StateMd = 0;
+                        Wormhole = null;
+                        WarpRdy = 0;
+                        return true;
+                    }
+                    break;
+            }
             return false;
         }
 
@@ -350,10 +492,7 @@ namespace Sim {
             //Vector3 cntx.DesVel = Vector3.zero;
             Quaternion desAvel = Quaternion.identity;
 
-
             float velM = 0;
-
-
             for(int i = 3; i-- > 0;) {
                 switch(State) {
                     case StateT.Mine:
@@ -373,144 +512,13 @@ namespace Sim {
                         _State = StateT.Idle;
                         continue;
                     case StateT.PrepWarp:
-
-                        var warp = cntx.EffPos - (Random.insideUnitSphere * 0.1f);
-                        var wm = warp.sqrMagnitude;
-
-
-                        if(Wormhole == null) {
-                            var v = warp.normalized;
-
-                            Vector3 wVec = (WarpTo.transform.position - Ar.transform.position).normalized;
-
-                            Wormhole = new Wormhole() {
-                                initPos = v * Ar.Radius,
-                                initRot = Quaternion.LookRotation(wVec, cntx.DesUp),
-                                Rad = 0.25f + Rad * 2.0f,
-                                Dir = wVec,
-                            };
-                            Wormhole.init(Ar);
-                        }
-
-                        if(Wormhole != null) {
-                            var v = Wormhole.fd(cntx.FrameInd).Pos - cntx.EffPos;
-                            if(Wormhole.State <= Wormhole.StateE.Forming)
-                                v -= Wormhole.Dir * Rad;
-                            else
-                                v += Wormhole.Dir * Rad;
-
-                            cntx.DesVel = v * 2;
-                            var vm = v.magnitude;
-                            if(vm < Rad * 4) {
-                                if(vm < Rad * 2) {
-                                    cntx.DesDir = Wormhole.Dir;
-                                    WarpRdy = 1;
-                                } else
-                                    WarpRdy = 1 - vm / Rad * 2;
-
-                                if(Wormhole.State >= Wormhole.StateE.Forming)
-                                    if(Wormhole.State == Wormhole.StateE.Warping) {
-
-                                    } else
-                                        WarpRdy = Vector3.Dot(cntx.DesDir, cntx.ODesDir);
-
-                                if(Ws == null)
-                                    Ws = St.requestWarp(this, WarpTo);
-                            } else
-                                WarpRdy = 0;
-
-                        } else {
-                            Debug.LogError("old...");
-                            if(wm > Mathf.Pow(Ar.Radius * 0.95f, 2)) {
-                                var v = WarpTo.transform.position - Ar.transform.position;
-                                if(v.sqrMagnitude > 0.01f)
-                                    cntx.DesDir = v.normalized;
-                            }
-
-                            float arr = Ar.Radius * 1.05f;
-                            if(wm < Mathf.Pow(arr, 2)) {
-                                wm = Mathf.Sqrt(wm);
-                                cntx.DesVel += warp * (arr - wm) / wm;
-                                WarpRdy = 0;
-                            } else {
-
-                                WarpRdy = Mathf.Max(Vector3.Dot(cntx.DesDir, cntx.ODesDir), 0);
-                                WarpRdy = 0.5f;
-                                if(WarpRdy > 0.1f) {
-                                    if(St != null) {
-                                        if(Ws == null)
-                                            Ws = St.requestWarp(this, WarpTo);
-                                    } else if(WarpRdy > 0.9f) {      ///beacon stuff begone...
-                                        //Bcn.warp(this, WarpTo);
-                                        enterWarp(ref fc);
-                                    }
-                                }
-                            }
-                        }
+                        if(act_PrepWarp( ref fc, ref cntx)) continue;
                         break;
-
                     case StateT.Warping:
-
-                        Vector3 vec = (WarpTo.transform.position - WarpFrom.transform.position);
-                        var mag = Mathf.Pow(vec.sqrMagnitude + 1, 0.3333f);
-
-                        vec.Normalize();
-
-                        if(Wormhole == null) {
-                            Wormhole = new Wormhole() {
-                                initPos = -(vec + Random.insideUnitSphere * 0.3f) * WarpTo.Radius,
-                                initRot = Quaternion.LookRotation(-vec, cntx.DesUp),
-                                Rad = 0.25f + Rad * 2.0f,
-                                Dir = -vec,
-                            };
-                            Wormhole.init(WarpTo);
-                        }
-
-                        Power -= cntx.Delta * 2;
-                        var v1 = WarpFrom.transform.position + vec * WarpFrom.Radius;
-                        var v2 = WarpTo.transform.position - vec * WarpTo.Radius;
-                        Debug.DrawLine(v1, v2, Color.cyan);
-
-                        switch(Wormhole.State) {
-                            case Wormhole.StateE.Hypothetical:
-                                WarpRdy += cntx.Delta / mag;
-                                if(WarpRdy >= 1) {
-                                    Wormhole.State = Wormhole.StateE.Forming;
-                                    Wormhole.StateMd = 0;
-                                    WarpRdy = 1;
-
-                                    var whh = Wormhole.Host as global::Wormhole;
-                                    if(whh != null)
-                                        whh.Vis.gameObject.SetActive(true);
-                                }
-                                n.Pos = Vector3.Lerp(v1, v2, 0.05f + WarpRdy * 0.9f);
-                                n.Rot = Quaternion.LookRotation(vec, cntx.DesUp);
-                                return;
-                            case Wormhole.StateE.Forming:
-                                Wormhole.StateMd += cntx.Delta * 2;
-                                if(Wormhole.StateMd > 1) {
-                                    cntx.Sim.DSwap.Add(new Simulation.DroneSwap() { Dr = this, A = Simulation.Singleton.WarpingDrones, Ar = WarpTo, B = WarpTo.Drones });
-                                    //Debug.Log("swap? "+cntx.FrameInd );
-                                    n.Pos = Wormhole.fd(cntx.FrameInd).Pos;
-                                    n.Vel = vec * MaxVel * 0.1f;
-                                    n.AVel = Quaternion.identity;
-
-                                    WarpFrom = WarpTo = null;
-                                    _State = StateT.Idle;
-
-                                    Wormhole.State = Wormhole.StateE.Deforming;
-                                    Wormhole.StateMd = 0;
-                                    Wormhole = null;
-                                    WarpRdy = 0;
-                                    return;
-                                }
-                                break;
-                        }
+                        if(act_Warping(ref cntx, ref n)) return;
                         break;
                     case StateT.UnderCtor:
                         return;
-
-
                 }
                 break;
             }
@@ -682,6 +690,7 @@ public class Drone : Body {
     public Sim.Drone buildSimDrone( Vector3 pos, Quaternion rot, Sim.Station st, Drone host ) {
         var sim = Simulation.Singleton;
         var ret = new Sim.Drone() {
+            name = name,
             initPos = pos,
             initRot = rot,
 
@@ -710,7 +719,7 @@ public class Drone : Body {
     public override void init() {
         var ar = GetComponentInParent<Sim.Area>();
 
-        var st = ar.GetComponentInChildren<Station>();
+        var st = ar.GetComponentInChildren<Station>( true );
         st.init();
 
         var sim = Simulation.Singleton;

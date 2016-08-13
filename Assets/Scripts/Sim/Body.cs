@@ -114,6 +114,14 @@ namespace Sim {
             n.Rot *= Quaternion.Slerp(Quaternion.identity, n.AVel, 0.2f);
             n.Rot = n.Rot.normalised();
         }
+
+        public delegate void FooDlg(ref Simulation.FrameCntx fc);
+        public void foo(ref Simulation.FrameCntx fc, FooDlg act) {
+            if(Host)
+                Host.foo(ref fc, act);
+            else 
+                act(ref fc);
+        }
     }
 
 

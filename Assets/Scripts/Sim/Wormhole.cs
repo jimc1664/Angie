@@ -34,17 +34,27 @@ namespace Sim {
             n.Rot = n.Rot.normalised();
         }
 
-        public void init(Area ar) {
-            _setArea( ar );
-            ar.WormHs.Add(this);
-
+        public void initVis() {
             var h = (Instantiate(World.Singleton.WormholeFab, Fd1.Pos, Fd1.Rot) as GameObject).GetComponent<global::Wormhole>();
             Host = h;
-            h.transform.parent = Ar.transform;
+            h.transform.parent = Ar.Vis;
             h.Bdy = this;
             h.Rad = Rad;
             h.BaseScl = h.Vis.transform.localScale *= Rad;
-            h.Vis.transform.localScale *= 0.001f;
+            
+
+            if(State > StateE.Forming) {
+                h.Vis.gameObject.SetActive(true);
+            } else {
+                h.Vis.transform.localScale *= 0.001f;
+            }
+        }
+
+        public void init(Area ar) {
+            _setArea( ar );
+            ar.WormHs.Add(this);
+            if(ar.IsVisible)
+                initVis();
             //h.Vis.gameObject.SetActive(false);
 
         }
