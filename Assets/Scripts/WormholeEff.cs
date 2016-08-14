@@ -50,13 +50,13 @@ public class WormholeEff : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-       transform.localRotation *= Quaternion.Euler(new Vector3(0,  450.0f * Time.deltaTime, 0));
+       transform.localRotation *= Quaternion.Euler(new Vector3(0,  450.0f * Time.unscaledDeltaTime, 0));
         var f = Vector3.up;
         float fac = 50.0f;
         float dm = 1.0f / Subs.Length;
-        // transform.rotation  *= Quaternion.AngleAxis(fac * Time.deltaTime, f);
+        // transform.rotation  *= Quaternion.AngleAxis(fac * Time.unscaledDeltaTime, f);
         foreach(var s in Subs) {
-            s.Trns.localRotation *= Quaternion.AngleAxis(fac * Time.deltaTime, f);
+            s.Trns.localRotation *= Quaternion.AngleAxis(fac * Time.unscaledDeltaTime, f);
 
 
             fac += 5 + fac*0.3f;

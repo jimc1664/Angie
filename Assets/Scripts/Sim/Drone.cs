@@ -87,6 +87,9 @@ namespace Sim {
         }
         public bool updatePost(ref Simulation.FrameCntx cntx) {
             if(Dmg > 0) {
+                if(Host as PlayerShipCtrlr) {
+                    Dmg = 0;
+                }
                 if(Dmg > Hp) {
                     return false;
                 }
@@ -136,15 +139,20 @@ namespace Sim {
                 MinVel = 0;
 
                 Pos = c.Pos;
+
+                FireAt = null;
             }
 
             public Vector3 EffPos, DesVel, DesDir, ODesDir, Pos, DesUp;
+
+            public Drone FireAt;
             public float MinVel;
         };
         bool act_Idle(ref DroneCntx cntx) {
             Target = null;
             switch(Behavior) {
                 case BehaviorT.Mine:
+                    return false ;
                     if(Mins > MaxMins * 0.9f || (St.Ar == Ar && Mins > 0)) {
                         if(St.Ar == Ar) {
                             Target = St;
@@ -293,14 +301,13 @@ namespace Sim {
         }
         bool act_Attack(ref DroneCntx cntx) {
             if(Target == null || Target.Ar != Ar) { //or is invalid...
-
                 _State = StateT.Idle;
                 return true;
             }
+            cntx.FireAt = Target as Drone;
 
             Vector3 seekEp = Target.fd(cntx.FrameInd).Pos + Target.fd(cntx.FrameInd).Vel * 0.25f;
             Vector3 seek = seekEp - cntx.EffPos;
-
 
             var arrive = seek;
             var arriveM = arrive.magnitude;
@@ -318,13 +325,13 @@ namespace Sim {
                     } else {
                         dv = Vector3.Cross(cntx.DesDir, Vector3.Cross(cntx.ODesDir, cntx.DesDir)) * MaxVel;
                     }
-                    Debug.DrawLine(cntx.Pos + Vector3.Cross(cntx.ODesDir, cntx.DesDir) * MaxVel, cntx.Pos, Color.cyan);
-                    Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.yellow);
+                  //  Debug.DrawLine(cntx.Pos + Vector3.Cross(cntx.ODesDir, cntx.DesDir) * MaxVel, cntx.Pos, Color.cyan);
+                   // Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.yellow);
                     if(arriveM > arrE) {
                         dv = Vector3.Lerp(dv, cntx.DesDir * MaxVel, (arriveM - arrE) / (MaxVel * 0.5f));
                     }
                     cntx.DesVel += dv;
-                    Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.green);
+                    //Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.green);
                 } else
                     cntx.DesVel = cntx.DesDir * (arriveM - arrE) * 2;
 
@@ -337,10 +344,18 @@ namespace Sim {
         bool act_PilotCtrl(ref DroneCntx cntx) {
             PlayerShipCtrlr ctrlr = Host as PlayerShipCtrlr;
 
-            cntx.DesDir = ctrlr.CamCntrl.transform.forward;
+            
             cntx.DesUp = ctrlr.CamCntrl.transform.up;
 
             cntx.DesVel += ctrlr.CamCntrl.FlyInput * MaxVel;
+
+            if(ctrlr.UI.FireTarget != null && ctrlr.UI.FireTarget.Sel != null && ctrlr.UI.FireTarget.Sel.Drn != null) {
+                cntx.FireAt = ctrlr.UI.FireTarget.Sel.Drn.Drn;
+                cntx.DesDir = cntx.FireAt.fd(cntx.FrameInd).Pos - cntx.EffPos;
+            } else {
+                cntx.DesDir = ctrlr.CamCntrl.transform.forward;
+            }
+
 
             return false;
         }
@@ -559,11 +574,12 @@ namespace Sim {
 
             var nDir = n.Rot * Vector3.forward;
 
-            if(State == StateT.Attack && Power > MaxPower * 0.25f) {
+            if( cntx.FireAt && Power > MaxPower * 0.25f) {
                 AimDot = Vector3.Dot(nDir, cntx.DesDir);
                 if(Vector3.Dot(nDir, cntx.DesDir) > 0.7f) {
-                    Debug.DrawLine(Target.fd(cntx.FrameInd).Pos, cntx.Pos, Color.red);
-                    var td = Target as Drone;
+                    if( Host != null )
+                        Debug.DrawLine(Host.transform.position, cntx.FireAt.Host.transform.position, Color.red);
+                    var td = cntx.FireAt as Drone;
                     td.Dmg += 5 * cntx.Delta;
                     Power -= 0.5f * cntx.Delta;
                 }
@@ -635,7 +651,6 @@ namespace Sim {
         [System.NonSerialized]
         public Station.WarpScedhule Ws = null;
         public class DroneGrp {
-
 
         }
 

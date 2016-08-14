@@ -71,10 +71,12 @@ public class CameraControl : MonoBehaviour {
     public Vector3 FlyInput;
 
 	void LateUpdate () {
+
+        //Camera.main.ResetProjectionMatrix();
         Matrix4x4 mat = Camera.main.projectionMatrix;
-        //mat[0, 2] = horizObl;
+       // mat[0, 2] = horizObl;
         mat[1, 2] = VerticalOblique;
-        Camera.main.projectionMatrix = mat;
+       // Camera.main.projectionMatrix = mat;
 
         var mMove = new Vector3( - Input.GetAxis("Mouse Y") * sensitivityY, Input.GetAxis("Mouse X") * sensitivityX, 0 );
 			

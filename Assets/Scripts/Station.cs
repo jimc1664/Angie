@@ -138,7 +138,7 @@ namespace Sim {
             // for(int i = DryDocks.Count; i-- > 0;) {
             //       var dd = DryDocks[Random.Range(0, DryDocks.Count)];
             if(DD.InConstruction != null) {
-                DD.Eta -= Time.deltaTime;
+                DD.Eta -= cntx.Delta;
                 if(DD.Eta < 0) {
                     DD.InConstruction.initState = Drone.StateT.Idle;
 

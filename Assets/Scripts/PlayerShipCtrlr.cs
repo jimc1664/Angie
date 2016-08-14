@@ -20,7 +20,7 @@ public class PlayerShipCtrlr : Drone {
 
     public void onAreaChange( Sim.Area old) {
         if(UI) {
-
+            UI.onAreaChange(old);
             UI.WarpButton.set(warpCallback, Drn.Ar != null);
         }
         

@@ -406,6 +406,11 @@ namespace Sim {
                     float avR = Mathf.Max(d1.Rad, d2.Rad);
                     avoidanceAndCollison( ref fc, d1, d2, p1, p2, d1.fd(fc.FrameInd).Vel, d2.fd(fc.FrameInd).Vel, 
                         p1_2, p2_2, mm, m1, m2, ms1, ms2, avR, ref d1.CollisonPush1, ref d1.CollisonPush2, ref d2.CollisonPush1, ref d2.CollisonPush2, ref d1.Avoidance, ref d2.Avoidance);
+
+
+                    if(d1.Owner != d2.Owner) {
+
+                    }
                 }
 
                 foreach(var b in Bodies) {

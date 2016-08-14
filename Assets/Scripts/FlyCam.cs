@@ -15,7 +15,7 @@ public class FlyCam : MonoBehaviour {
 
         float delta = 0;
         if(Time.timeScale > Mathf.Epsilon)
-            delta = Time.deltaTime / Time.timeScale;
+            delta = Time.deltaTime / Time.unscaledDeltaTime;
 
 
         float spd = delta * Speed;
@@ -33,7 +33,7 @@ public class FlyCam : MonoBehaviour {
 
             euler.z = 0;
             transform.localEulerAngles = euler;
-            //transform.Rotate(new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.deltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.deltaTime));
+            //transform.Rotate(new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.unscaledDeltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.unscaledDeltaTime));
 
 
         }

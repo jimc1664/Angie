@@ -26,6 +26,8 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
     public GameObject Popup_Panel, Popup_Button, Popup_ButtonEx;
 
+    public GameObject Icon_Frame, Icon_Ship, Icon_Station;
+
     public RectTransform SolSys;
 
     public GameObject UI_Hl = null;

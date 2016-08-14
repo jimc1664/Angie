@@ -35,7 +35,7 @@ public class OrbitCam : MonoBehaviour {
 
         if(Input.GetMouseButton(2)) { //EventSystem.current.IsPointerOverGameObject()
            // Vector3 target = Vector3.zero; //this is the center of the scene, you can use any point here
-            var euler = CRot.eulerAngles + new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.deltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.deltaTime);
+            var euler = CRot.eulerAngles + new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.unscaledDeltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.unscaledDeltaTime);
 
             if(euler.x > 180.0f) euler.x -= 360.0f;
             if(Mathf.Abs(euler.x) > 80) euler.x = Mathf.Sign(euler.x) * 80;
@@ -49,12 +49,12 @@ public class OrbitCam : MonoBehaviour {
           //  CRot = CRot.normalised();
             transform.rotation *= diff;
             //transform.localEulerAngles = euler;
-            //transform.Rotate(new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.deltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.deltaTime));            
+            //transform.Rotate(new Vector3(Input.GetAxis("Mouse Y") * RotateSpd.x * Time.unscaledDeltaTime, Input.GetAxis("Mouse X") * RotateSpd.y * Time.unscaledDeltaTime));            
         }
 
-        transform.rotation = Quaternion.Lerp(transform.rotation, CRot, Time.deltaTime*3.0f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, CRot, Time.unscaledDeltaTime * 3.0f);
        // transform.rotation = CRot;
-        D += Input.GetAxis("Mouse ScrollWheel") * ZoomSpd * Time.deltaTime;
+        D += Input.GetAxis("Mouse ScrollWheel") * ZoomSpd * Time.unscaledDeltaTime;
 
         transform.position = p - CRot* Vector3.forward * D*D;
 
