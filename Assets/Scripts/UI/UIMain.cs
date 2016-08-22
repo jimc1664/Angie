@@ -24,6 +24,14 @@ ICancelHandler - OnCancel - Called when the cancel button is pressed*/
 
 public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
+    public enum UIMode {
+        Ship,
+        Map,
+        Ctor,
+    }
+
+    public UIMode UIMd = UIMode.Ship;
+
     public GameObject Popup_Panel, Popup_Button, Popup_ButtonEx;
 
     public GameObject Icon_Frame, Icon_Ship, Icon_Station;
@@ -52,6 +60,13 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
     }
 
+    public Camera MainCam;
+    void Start() {
+        setUIMode(UIMd, false );
+        MainCam = Camera.main;
+    }
+
+
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData) {
         UI_Hl = eventData.pointerEnter;
     }
@@ -67,7 +82,7 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     public Vector2 MPos;
     protected Vector2 LMPos;//, CMPos;
 
-   // [HideInInspector]  public bool Return;
+    // [HideInInspector]  public bool Return;
     public Vector2 MMove { get; private set; }
     public Vector2 RawMMove { get; private set; }
     public Vector3 MPoint { get; private set; }
@@ -105,8 +120,8 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
         //      MPos.y = Mathf.Clamp(MPos.y + mmy * MouseSensitivity.y, 0, Screen.height);
     }*/
 
-  //  public delegate void MouseCB(ref Vector2 mp, Vector2 cmp);
-   // [HideInInspector]  public MouseCB MCB = null;
+    //  public delegate void MouseCB(ref Vector2 mp, Vector2 cmp);
+    // [HideInInspector]  public MouseCB MCB = null;
 
 
 
@@ -114,15 +129,15 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
         MPos = Input.mousePosition;
 
         RawMMove = MPos - LMPos;
-      //  if(MCB != null) MCB(ref MPos, CMPos);
+        //  if(MCB != null) MCB(ref MPos, CMPos);
         MMove = MPos - LMPos;
         LMPos = MPos; //CMPos = Vector2.zero;
 
-       // UICamera.mMouse[0].pos = MPos;
+        // UICamera.mMouse[0].pos = MPos;
 
         Vector3 mp3 = new Vector3(MPos.x, MPos.y, 0);
 
-        MRay = Camera.main.ScreenPointToRay(mp3);
+        MRay = MainCam.ScreenPointToRay(mp3);
 
         for(int i = 3; i-- > 0;) {
             var old = MouseB[i];
@@ -132,9 +147,9 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
         }
 
         int mi = 1;
-       // Debug.Log("  b " + MouseB[mi] + "  d " + MouseDown[mi] + "  u " + MouseUp[mi]);
+        // Debug.Log("  b " + MouseB[mi] + "  d " + MouseDown[mi] + "  u " + MouseUp[mi]);
 
-        if(LockHighlight == null ) {
+        if(LockHighlight == null) {
             UIEle nHl = null;
             if(UI_Hl == null) {
 
@@ -160,12 +175,47 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
         } else {
             LockHighlight.keptHighlight(this);
- 
+
         }
 
-        if(CtorMain.Singleton.isActiveAndEnabled ) //todo -- better
+        if(CtorMain.Singleton.isActiveAndEnabled) //todo -- better
             CtorMain.Singleton.update(this);
 
+        if(Input.GetKeyUp(KeyCode.F1)) {
+            setUIMode(UIMode.Ship);
+        } else if(Input.GetKeyUp(KeyCode.F2)) {
+            setUIMode(UIMode.Map);
+        } else if(Input.GetKeyUp(KeyCode.F3)) {
+            setUIMode(UIMode.Ctor);
+        }
+
+    }
+
+    public OrbitCam SolCam;
+    public FlyCam CtorCam;
+
+    void setUIMode(UIMode m, bool check = true) {
+        if(check && m == UIMd) return;
+
+        UIMd = m;
+
+        // GetComponentInChildren<ShipHud>(true) .set(UIMd == UIMode.Ship);
+        GetComponentInChildren<ShipHud>(true).set(true);
+        FindObjectOfType<CameraControl>().enabled = UIMd == UIMode.Ship;
+
+
+        //SolCam.gameObject .SetActive(  UIMd == UIMode.Map );
+        SolSys.gameObject.SetActive(true);
+        SolCam.enabled = UIMd == UIMode.Map;
+
+
+        CtorCam.enabled = UIMd == UIMode.Ctor;
+        CtorMain.Singleton.enabled = UIMd == UIMode.Ctor;
+
+        Time.timeScale = (UIMd == UIMode.Ctor) ? 0.05f : 1;
+
+
+       // MainCam = (UIMd == UIMode.Ctor) ? CtorCam.Cam : Camera.main;
 
     }
 }

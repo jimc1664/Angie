@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 public class StarGen : MonoBehaviour {
 
-
+    public SingleUnityLayer SolLayer;
     public GameObject OrbitLR, PlanetUI;
 
     public Sprite Unknown;
@@ -29,6 +29,10 @@ public class StarGen : MonoBehaviour {
 
     public List<GameObject> RoidFabs;
     public List<Material> RoidMats;
+
+
+    public float _Sol_2_Area = 0.01f;
+    public static float Sol_2_Area { get { return Singleton._Sol_2_Area; } }
 
 #if UNITY_EDITOR
     public const string LibName = "plg_dbg";

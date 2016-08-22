@@ -67,10 +67,13 @@ public class PopupButton : Button {
           
             brt.localPosition = new Vector3( 0, (brt.rect.size.y + spc) * (list.Count -i) + brt.rect.size.y  * 0.5f + spc*2 - prt.rect.height *0.5f , 0);
             brt.GetComponentInChildren<Text>().text = e.Name;
-
+            brt.localRotation = Quaternion.identity;
+            brt.localScale = Vector3.one;
         }
         prt.parent = transform;
         prt.localPosition= new Vector3( prt.rect.width*0.7f, prt.rect.height*0.5f, 0 );
+        prt.localRotation = Quaternion.identity;
+        prt.localScale = Vector3.one;
         // if(Other != null) Other.baseOnPointerEnter(eventData);
     }
     public override void OnPointerExit(PointerEventData eventData) {

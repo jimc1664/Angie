@@ -85,13 +85,6 @@ public class Buzzer : Body {
     void OnDrawGizmos() {
         Trnsfrm = transform;
 
-        Gizmos.color = Color.green;
-        // if(Target != null)
-        //    Gizmos.DrawLine(Trnsfrm.position, Target.position);
-
-        Gizmos.color = Color.blue;
-        // Gizmos.DrawLine(Trnsfrm.position, Trnsfrm.position + Vel );
-
 
         var rot = Trnsfrm.rotation;
         Matrix4x4 rotM = Matrix4x4.TRS(Vector3.zero, rot, Vector3.one).transpose;

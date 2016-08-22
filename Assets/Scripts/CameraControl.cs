@@ -14,10 +14,11 @@ public class CameraControl : MonoBehaviour {
 	
 	
 	public class InputHelper {
-		
+        private InputHelper() { }
 		public InputHelper( string name, bool initToggle = false ) {
-			
-		}
+            Name = name;
+            Toggle = initToggle;
+        }
 		
 		public bool proc( Vector3 mMove ) {
 						
@@ -51,8 +52,8 @@ public class CameraControl : MonoBehaviour {
 		
 		public bool LState = false;
 		
-		string Name = name;		
-		bool Toggle = initToggle, LPress = false;		
+		string Name;		
+		bool Toggle, LPress = false;		
 		
 		float Drag = 0f;	
 	}
@@ -73,9 +74,9 @@ public class CameraControl : MonoBehaviour {
 	void LateUpdate () {
 
         //Camera.main.ResetProjectionMatrix();
-        Matrix4x4 mat = Camera.main.projectionMatrix;
+     //   Matrix4x4 mat = Camera.main.projectionMatrix;
        // mat[0, 2] = horizObl;
-        mat[1, 2] = VerticalOblique;
+        //mat[1, 2] = VerticalOblique;
        // Camera.main.projectionMatrix = mat;
 
         var mMove = new Vector3( - Input.GetAxis("Mouse Y") * sensitivityY, Input.GetAxis("Mouse X") * sensitivityX, 0 );

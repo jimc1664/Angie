@@ -133,9 +133,8 @@ public class ShipHud : MonoBehaviour {
         mod.color = modCol;
 
     }
-    void LateUpdate () {
 
-       // Color modCol = Vector4.zero;
+    void updateTargetSelctions() {
         for(int i = ActiveTargets; i-- > 0;) {
             var ts = TargetSels[i];
             if(ts.Drn == null || ts.Drn.Drn.Ar != Plyr.Drn.Ar) {
@@ -153,6 +152,12 @@ public class ShipHud : MonoBehaviour {
                 setMod(ts.Mod, ts.Trgt == FireTarget);
             }
         }
+    }
+    void LateUpdate () {
+        updateTargetSelctions();
+       // Color modCol = Vector4.zero;
+        
+
         if(FireTarget != null && (FireTarget.Sel == null || FireTarget.Sel.Trgt != FireTarget) )
             FireTarget = null;
 
@@ -171,7 +176,7 @@ public class ShipHud : MonoBehaviour {
                     Targets.Remove(k);
                 }
 
-            var cm = Camera.main;
+            var cm = Plyr.CamCntrl.GetComponent<Camera>();
 
 
             float rMod = 300.0f / -Mathf.Tan(0.5f * cm.fieldOfView);
@@ -180,18 +185,25 @@ public class ShipHud : MonoBehaviour {
             foreach(var b in Plyr.Drn.Ar.Vis.GetComponentsInChildren<Body>()) {
                 var d = b as Drone;
                 if( d == null || d == Plyr) continue;
-
+                //Debug.Log("target  ?" + d.name);
                 Targetable t;
                 if(!Targets.TryGetValue(d.Drn, out t)) {
                     t = new Targetable();
                     t.UI = Instantiate(UIMain.Singleton.Icon_Frame).GetComponent<RectTransform>();
                     t.UI.parent = TargetIcons;
+                    t.UI.localRotation = Quaternion.identity;
+                    t.UI.localScale = Vector3.one;
+                    t.UI.localPosition = Vector3.zero;
+
                     t.UI.name = b.name;
                     t.Frame = t.UI.GetChild(0) as RectTransform;
                     t.Bttn = t.UI.GetComponent<ButtonRmb>();
                     //  t.Frame.SetAsFirstSibling();
                     t.Icon = Instantiate(UIMain.Singleton.Icon_Ship).transform as RectTransform;
-                    t.Icon.transform.parent = t.UI;
+                    t.Icon.parent = t.UI;
+                    t.Icon.localRotation = Quaternion.identity;
+                    t.Icon.localScale = Vector3.one;
+                    t.Icon.localPosition = Vector3.zero;
 
                     var bttnImg = t.Icon.GetComponent<Image>();
 
@@ -298,4 +310,15 @@ public class ShipHud : MonoBehaviour {
             }
         }
 	}
+
+
+    public void set( bool act ) {
+
+        gameObject.SetActive(act);
+
+        if(act == false) {
+            onAreaChange(null);
+            updateTargetSelctions();
+        }
+    }
 }

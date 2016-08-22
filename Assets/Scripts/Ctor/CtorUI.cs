@@ -40,10 +40,10 @@ public class CtorUI : MonoBehaviour {
 
     public Structure Selected;
 
-    public void add(Structure s) {
-
-        s.Ui=Tv.add(s.name, s );
-
+    public void add(Structure s ) {
+        TreeView_Ele p = null;
+        if(s.Parent) p = s.Parent.Ui;
+        s.Ui=Tv.add(s.name, s, p );
     }
 
 

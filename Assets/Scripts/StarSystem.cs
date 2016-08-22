@@ -13,32 +13,9 @@ public class StarSystem : MonoBehaviour {
     public float OrbitalPow = 0.6f;
     public float LunarScale = 0.33333f;
 
-    class Area : IQuadTreeObject {
 
-        public Vector2 Pos;
-        public Vector2 GetPosition() {
-                return Pos;// * 10.0f;
-        }
-        public float Rad {
-            get {
-                return _Rad;
-            }
-            set {
-                _Rad = value;
-            }
-        }
-        float _Rad;
-        public Vector3 Pos3 {
-            get {
-                return new Vector3( Pos.x,0, Pos.y);
-            }
-        }
-        public List<Area> Nbrs;
-
-        public int Island = -1;
-    };
-
-    List<Area> Areas;
+    [SerializeField]
+    List<Sim.Area> Areas;
     public float DensityMod = 0.2f, DensityPow = 1.75f;
     public float MinIsoDistance = 2;
     public bool KillIso = false;
@@ -67,15 +44,16 @@ public class StarSystem : MonoBehaviour {
         Random.seed = Seed;
         float areaPass = 0, areaTheta = Random.value * Mathf.PI * 2;
 
-        Areas = new List<Area>();
+        Areas = new List<Sim.Area>();
         //float bounds = 50;
-        QuadTree<Area> qt = new QuadTree<Area>(3); //, new Rect( -bounds, -bounds, bounds*2, bounds*2) );
+        QuadTree<Sim.Area> qt = new QuadTree<Sim.Area>(3); //, new Rect( -bounds, -bounds, bounds*2, bounds*2) );
         //Debug.Log("xxx " + qt.QuadRect);
 
         List<int> islandRedir = new List<int>( 32 );
 
         StarGen.StarGen_gen(Seed, (ref StarGen.SunDat s) => {
             var go = new GameObject();
+            go.layer = StarGen.Singleton.SolLayer;
             go.transform.parent = transform;
             star = go.AddComponent<Star>();
 
@@ -88,6 +66,7 @@ public class StarSystem : MonoBehaviour {
 
             var go = new GameObject();
             go.transform.parent = star.transform;
+            go.layer = StarGen.Singleton.SolLayer;
             var planet = go.AddComponent<Planetoid>();
             
             var sphr = Instantiate(StarGen.Singleton.Sphere).transform;
@@ -99,14 +78,16 @@ public class StarSystem : MonoBehaviour {
 
 
             var spr = uiGo.GetComponent<UnityEngine.UI.Image>();
-           
-            var s = Mathf.Pow(p.radius / 6378.0f, 1.0f/3.0f) * 40.0f;
+
+            var s = Mathf.Pow(p.radius / 6378.0f, 1.0f / 3.0f) * 40.0f;
             var uit = uiGo.GetComponent<RectTransform>();
 
-            uit.localScale = Vector3.one *s;
-           // uit.sizeDelta = Vector2.zero;
+            uit.localScale = Vector3.one * s;
+            // uit.sizeDelta = Vector2.zero;
             uit.anchoredPosition = Vector2.zero;
-
+            uit.parent = ui;
+            uit.localScale = Vector3.one * s;
+            uit.localRotation = Quaternion.identity;
             // uit.offsetMin = new Vector2(0, 0);
             // uit.offsetMax = new Vector2(s, s);
             //int pSeed = Seed;
@@ -126,8 +107,10 @@ public class StarSystem : MonoBehaviour {
                     float iterCnt = Mathf.Floor(areaPass);
                     areaPass -= iterCnt;
                     for(int i = (int)iterCnt; i-- > 0;) {
-                        var ar = Instantiate(StarGen.Singleton.Area).transform;
-                        ar.transform.parent = star.transform;
+                        var arT = Instantiate(StarGen.Singleton.Area).transform;
+                        
+                        arT.gameObject.layer = StarGen.Singleton.SolLayer;
+                        arT.transform.parent = star.transform;
 
                         float lrp = Random.Range(-1.0f, 1.0f) * (Random.value*0.3f+0.7f) * 0.4f + 0.5f;
                         float a = Mathf.Lerp(lPlanet.a, p.a, lrp);
@@ -137,7 +120,7 @@ public class StarSystem : MonoBehaviour {
                         float x = a * Mathf.Cos(areaTheta);
                         float y = a * Mathf.Sin(areaTheta);
                         var ap = new Vector2(x, y);
-                        ar.transform.localPosition = new Vector3( x, 0, y );
+                        arT.transform.localPosition = new Vector3( x, 0, y );
 
                         var nbrs = qt.RetrieveObjectsInArea(ap, MinIsoDistance);
                         int island = islandRedir.Count;
@@ -158,16 +141,22 @@ public class StarSystem : MonoBehaviour {
 
                         if(island == islandRedir.Count)
                             islandRedir.Add(island);
-                        var ar2 = new Area() { Pos = ap, Nbrs = nbrs, Island = island, Rad = 0.1f };
-                        Areas.Add(ar2);
+
+                        var ar = arT.GetComponent<Sim.Area>();
+                        ar.Island = island;
+                        ar.Nbrs = nbrs;
+                        ar.Sol_Radius = 0.1f;
+                        ar.GenRoids = 5;
+                        //var ar2 = new Area() { Pos = ap, Nbrs = nbrs, Island = island, Rad = 0.1f };
+                        Areas.Add(ar);
                         
-                        qt.Insert(ar2);
+                        qt.Insert(ar);
                     }
                 } else {
                     areaPass = areaDensityFunc(p.a);
                 }
 
-                uit.parent = ui;
+
                 lpui = uit;
            
                 px += s * 0.51f;
@@ -193,7 +182,8 @@ public class StarSystem : MonoBehaviour {
 
                // go.transform.localPosition = Vector3.down * p.moon_e;
             }
-
+            
+            //uit.localScale = Vector3.one * s;
 
             spr.sprite = Planetoid.type_sprite((Planetoid.Planet_Type)p.type);
 
@@ -201,8 +191,8 @@ public class StarSystem : MonoBehaviour {
 
             {
                 var ap3 = planet.transform.position;
-                var ar2 = new Area() { Pos = new Vector2(ap3.x, ap3.z), Nbrs = new List<Area>(), Island = 0, Rad = 0.3f };
-                Areas.Add(ar2);
+                //var ar2 = new Area() { Pos = new Vector2(ap3.x, ap3.z), Nbrs = new List<Area>(), Island = 0, Rad = 0.3f };
+                //Areas.Add(ar2);
 
                 // qt.Insert(ar2)
             }
@@ -234,6 +224,8 @@ public class StarSystem : MonoBehaviour {
         }
 
     }
+
+
     void OnDrawGizmos() {
 
         if(Areas == null) return;
@@ -241,10 +233,9 @@ public class StarSystem : MonoBehaviour {
         foreach(var a1 in Areas) {
             Gizmos.color = (a1.Island == 0) ? Color.green : Color.red;
 
-            Gizmos.DrawWireSphere(a1.Pos3, a1.Rad);
+            Gizmos.DrawWireSphere(transform.TransformPoint(a1.Pos3), a1.Rad);
             foreach(var a2 in a1.Nbrs)
-                Gizmos.DrawLine(a1.Pos3, a2.Pos3);
-
+                Gizmos.DrawLine(  transform.TransformPoint( a1.Pos3 ), transform.TransformPoint( a2.Pos3 ));
         }
     }
 }

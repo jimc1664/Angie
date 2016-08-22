@@ -106,7 +106,7 @@ public class Planetoid : MonoBehaviour {
         */
         initSpr();
 
-        Instantiate(StarGen.Singleton.OrbitLR).GetComponent<OrbitPath>().init(transform.parent, oa );
+        Instantiate(StarGen.Singleton.OrbitLR).GetComponent<OrbitPath>().init(transform.parent, oa, gameObject.layer );
     }
     
     void positionSpr( float s = 1 ) {
@@ -121,7 +121,9 @@ public class Planetoid : MonoBehaviour {
     void initSpr() {
 
         var pui = Instantiate(Pui);
-        pui.AddComponent<Canvas>();
+        pui.layer = gameObject.layer;
+        var canvas = pui.AddComponent<Canvas>();
+        canvas.worldCamera = UIMain.Singleton.SolCam.GetComponent<Camera>();
         pui.AddComponent<UnityEngine.UI.CanvasScaler>();
         pui.AddComponent<UnityEngine.UI.GraphicRaycaster>();//.ignoreReversedGraphics = false;
         Spr = pui;
@@ -129,9 +131,11 @@ public class Planetoid : MonoBehaviour {
         var img = pui.GetComponent<UnityEngine.UI.Image>();
         // img.sprite = type_sprite(PType);
         positionSpr();
-
+        
         PairedButton b1 = Pui.GetComponentInChildren<PairedButton>(), b2 = Spr.GetComponentInChildren<PairedButton>();
         b1.setOther(b2);
+
+        
 
     }
 
@@ -172,10 +176,11 @@ public class Planetoid : MonoBehaviour {
     }
     void LateUpdate() {
         if(Spr == null) return;
-        float d = (Camera.main.transform.position - transform.position).magnitude;
-        Debug.DrawLine(Camera.main.transform.position, transform.position);
+
+        float d = (UIMain.Singleton.SolCam.transform.position - transform.position).magnitude;
+        //Debug.DrawLine(UIMain.Singleton.SolCam.transform.position, transform.position);
         positionSpr( d * 0.1f);
-        Spr.transform.rotation = Quaternion.LookRotation( Camera.main.transform.forward  );
+        Spr.transform.rotation = Quaternion.LookRotation( UIMain.Singleton.SolCam.transform.forward  );
     }
 
     public static string type_string( Planet_Type type) {

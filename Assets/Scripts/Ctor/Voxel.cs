@@ -17,7 +17,12 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     static int EmissivePropId = -1;
 
+    void Start() {
+        //init(GetComponentInParent<Structure>());
+    }
     public void init( Structure strct ) {
+
+        Debug.Assert(Strct == null);
         Strct = strct;
 
         transform.parent = strct.transform;
@@ -74,7 +79,7 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
     void upCol() {
         var col = Color.white;
 
-        if(Strct.Ui && Strct == CtorMain.Singleton.UI.Selected ) {
+        if(Strct.Ui && CtorMain.Singleton.UI.Selected != null && CtorMain.Singleton.UI.Selected.Root == Strct.Root ) {
             bool sel = Selected;
             if(Highlighted) {
                 if(sel)
@@ -228,6 +233,9 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
     public Vector3 Scale = Vector3.one;
     public Quaternion Rot = Quaternion.identity;
 
+    public float Weighting = 1;
+
+    /*
     // [System.Serializable]
     public struct Nbrs_S {
         public Voxel L, R, U, D, F, B;
@@ -260,7 +268,7 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
             L = R = U = D = F = B = null;
         }
     };
-    public Nbrs_S Nbrs;
+    public Nbrs_S Nbrs_Old;
 
     public struct NbrsD_S {
         public float L, R, U, D, F, B;
@@ -293,14 +301,9 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
             L= R= U= D= F= B = v;
         }
     };
-    public NbrsD_S NbrsD;
-
+    public NbrsD_S NbrsD_Old;
+    */
     public Vector3 midOff(FaceT fc) {
-
-        var n = Nbrs[fc];
-        if(n == null) {
-
-        }
         Matrix4x4 mat = Matrix4x4.TRS(Vector3.zero, Rot, Scale);
         return mat.MultiplyVector(nrm2(fc)*0.5f);
     }
@@ -358,6 +361,7 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
      };
      public Faces_S Faces; */
 
+  //  public Structure.Face_Old[] Faces_Old;
     public Structure.Face[] Faces;
 
     //[System.NonSerialized]
@@ -428,19 +432,19 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     public delegate void DecQuad(Structure.TriRef tr, Vector3 n, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4);
     public delegate void DecTri(Structure.TriRef tr, Vector3 n, Vector3 v1, Vector3 v2, Vector3 v3);
-    public void toMesh(Structure.BuildCntx cntx, DecQuad quad, DecTri tri) {
+    /*public void toMesh(Structure.BuildCntx cntx, DecQuad quad, DecTri tri) {
         bool flip = Strct.StyleFlag;
         flip = false;
         forEach((FaceT fc) => {
 
-            var f = Faces[(int)fc];
-            var nbr = Nbrs[fc];
+            var f = Faces_Old[(int)fc];
+            var nbr = Nbrs_Old[fc];
 
             for(int adjI = Structure.FaceAdj2[(int)fc, 4]; adjI-- > 0;) {
                 break;
                 var fi = (FaceT)Structure.FaceAdj2[(int)fc, adjI];
 
-                var f1 = Faces[(int)fi];
+                var f1 = Faces_Old[(int)fi];
 
                 if(!flip)
                     quad(f.Tr, -(f.norm(this) + f1.norm(this)).normalized,    //todo  - normal is wrong...
@@ -459,13 +463,13 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
 
                 for(int adjI2 = Structure.FaceAdj2[(int)fi, 4]; adjI2-- > 0;) {
                     var fi2 = (FaceT)Structure.FaceAdj2[(int)fi, adjI2];
-                    var f2 = Faces[(int)fi2];
+                    var f2 = Faces_Old[(int)fi2];
                     //if(flip && Nbrs[fi2] != null) continue;
                     for(int i = 2; i-- > 0;) {  //todo - optimise  ---->> lookup
                         int i2 = i;
 
-                        if(!ReferenceEquals(cntx.Vert[this, Structure.FaceVi[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fc, i]]], cntx.Vert[this, Structure.FaceVi[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fi2, i]]])) i2 = 1 - i2;
-                        if(!ReferenceEquals(cntx.Vert[this, Structure.FaceVi[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fc, i]]], cntx.Vert[this, Structure.FaceVi[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fi2, i2]]])) continue;
+                        if(!ReferenceEquals(cntx.Vert[this, Structure.FaceVi_Old[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fc, i]]], cntx.Vert[this, Structure.FaceVi_Old[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fi2, i]]])) i2 = 1 - i2;
+                        if(!ReferenceEquals(cntx.Vert[this, Structure.FaceVi_Old[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fc, i]]], cntx.Vert[this, Structure.FaceVi_Old[(int)fi, Structure.FaceAdjVerts[(int)fi, (int)fi2, i2]]])) continue;
 
                         var v1 = f.vert(this, Structure.FaceAdjVerts[(int)fc, (int)fi, i]);
                         var v2 = f1.vert(this, Structure.FaceAdjVerts[(int)fi, (int)fc, i]);
@@ -501,15 +505,15 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
                 for(int j = 4; j-- > 0;) {
                     int j1 = (j + 1) % 4;
                     quad(f.Tr, f.norm(this),
-                        cntx.Vert[this, Structure.FaceVi[(int)fc, j]].V,
-                        cntx.Vert[this, Structure.FaceVi[(int)fc, j1]].V,
+                        cntx.Vert[this, Structure.FaceVi_Old[(int)fc, j]].V,
+                        cntx.Vert[this, Structure.FaceVi_Old[(int)fc, j1]].V,
                         f.Cp[j1],
                         f.Cp[j]);
                 }
             }
         });
     }
-
+    */
     public Vector3[,] getMidPoints() {
 
         var ret = new Vector3[6, 2];
@@ -523,17 +527,18 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
         return ret;
     }
 
+    /*
     public FaceT opp(Voxel n, FaceT fi) {
         var oi = Structure.opp(fi);
         
-        if(Nbrs[oi] == n ) {
+        if(Nbrs_Old[oi] == n ) {
             
         } else {
           //  Debug.Log("opp-long  " + n  +"    " + fi + " -> " + oi);
             bool fail = true;
             forEach((FaceT oi2) => {
              //   Debug.Log("       " + oi2 + "    " + fi + " -> " + oi);
-                if(Nbrs[oi2] == n) {
+                if(Nbrs_Old[oi2] == n) {
                     oi = oi2;
                     fail = false;
                 }
@@ -541,17 +546,8 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
             if(fail) Debug.LogError("err");
         }
         return oi;
-    }
-    /*
-public void OnPointerEnter(PointerEventData eventData) {
-   OnPointerEnter();
-}
-public void OnPointerExit(PointerEventData eventData) {
-   OnPointerExit();
-}
-public void OnPointerClick(PointerEventData eventData) {
-   OnPointerClick();
-} */
+    }*/
+
 
     void OnDrawGizmos() {
 
@@ -568,38 +564,35 @@ public void OnPointerClick(PointerEventData eventData) {
         foreach(var n in PossNbr) {
             Gizmos.DrawLine(transform.position, n.transform.position);
         }
-
-        Gizmos.color = Color.red;
-
-        forEach_Hf((FaceT fi) => {
-            var n = Nbrs[fi];
-            if(n) {
-                Gizmos.DrawLine(transform.position, n.transform.position);
-
-            }
-        });
-        Gizmos.color = Color.blue;
-
-        forEach((FaceT fi) => {
-            var n = Nbrs[fi];
-            if(n) {
-                Gizmos.DrawLine(transform.position, transform.position+ nrm(fi) );
-
-            }
-        });
-
         /*
-        for(int i = 6; i-- > 0;) {
-            var n = Strct.get(I + faceOff(i));
-            if(n && n.GetInstanceID() > GetInstanceID()) {
-                Gizmos.DrawLine(transform.position, n.transform.position);
+       Gizmos.color = Color.red;
+       /*
+      forEach_Hf((FaceT fi) => {
+          var n = Nbrs_Old[fi];
+          if(n) {
+              Gizmos.DrawLine(transform.position, n.transform.position);
 
-            }
-        }*/
+          }
+      });
+      Gizmos.color = Color.blue;
+
+      forEach((FaceT fi) => {
+          var n = Nbrs_Old[fi];
+          if(n) {
+              Gizmos.DrawLine(transform.position, transform.position+ nrm(fi) );
+
+          }
+      });
+
+
+      for(int i = 6; i-- > 0;) {
+          var n = Strct.get(I + faceOff(i));
+          if(n && n.GetInstanceID() > GetInstanceID()) {
+              Gizmos.DrawLine(transform.position, n.transform.position);
+
+          }
+      }*/
     }
-
-
-
 
 
 }

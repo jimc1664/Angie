@@ -12,7 +12,8 @@ public class OrbitPath : MonoBehaviour {
     LineRenderer LR;
 
     public float A;
-    public void init( Transform p, float a ) {
+    public void init( Transform p, float a, int l ) {
+        gameObject.layer = l;
         A = a;
         transform.parent = p;
         transform.localPosition = Vector3.zero;
@@ -35,7 +36,7 @@ public class OrbitPath : MonoBehaviour {
     }
 
     void OnWillRenderObject() {
-        var cam = Camera.main;
+        Camera cam;
 #if UNITY_EDITOR
         if(!Application.isPlaying) {
             if(SceneView.lastActiveSceneView == null) return;
@@ -45,9 +46,10 @@ public class OrbitPath : MonoBehaviour {
 
             cam = SceneView.lastActiveSceneView.camera;
             // Debug.Log("w " + w);
-        }
+        } else
+            cam = UIMain.Singleton.SolCam.GetComponent<Camera>();
 #endif
-        //var m = Vector3.Dot(cam.transform.rotation * Vector3.forward, -cam.transform.position);
+            //var m = Vector3.Dot(cam.transform.rotation * Vector3.forward, -cam.transform.position);
 
         Vector3 cp = transform.InverseTransformPoint( cam.transform.position ), p1 = cp;
         p1.y = 0;

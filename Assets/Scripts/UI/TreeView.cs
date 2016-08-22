@@ -154,7 +154,8 @@ public class TreeView : MonoBehaviour {
         //var p = findEntry(Sr.content, NewParent);
         t.parent = (p != null) ? p.transform : Sr.content;
         t.localPosition = Vector3.zero;
-
+        t.localRotation = Quaternion.identity;
+        t.localScale = Vector3.one;
         
         ele.Select.onValueChanged.AddListener((bool b) => {
             if(b)

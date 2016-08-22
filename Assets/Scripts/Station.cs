@@ -4,6 +4,23 @@ using Sim;
 
 namespace Sim {
 
+
+
+    public class Resource {
+        //public string Name;
+        enum ResType {
+            EnergyStorage,
+            Energy,
+            Mineral,
+
+            Mining, 
+            Defence,
+        };
+
+
+        public float Amnt; 
+    };
+
     public struct Metric {
         public Metric(int smpls) {
             Sample = smpls;
@@ -166,9 +183,7 @@ namespace Sim {
 
                             // Debug.Log("start warp " + Ws[i].Dr.Host + "   to " + Ws[i].To + "   from " + Ws[i].Dr.Ar);
                             Warping = Ws[i];
-                            Ws.RemoveAt(i);
-
-                            
+                            Ws.RemoveAt(i);                         
                             break;
                         }
                     }
@@ -367,15 +382,6 @@ public class Station : Body {
 
     public List<DryDock> DryDocks;
 
-    void Update() {
-
-
-        if(Sm != null && Sm.Ws.Count > 0) {
-
-            var ws = Sm.Ws[0];
-            Debug.DrawLine(ws.Dr.fd(0).Pos, ws.To.transform.position, Color.green);
-        }
-    }
 
     void OnDrawGizmos() {
 

@@ -54,6 +54,15 @@ public static class Math_JC {
         trans.localScale = new Vector3(1, 1, 1);
     }
 
+
+    public static T getComponentInParentAct<T>(this Component t ) where T : Component {
+        T ret = null;
+        var p = t.transform.parent;
+        if(p != null)
+            return p.GetComponentInParent<T>();
+        return ret;
+    }
+
     public static float sqrMag(this Quaternion q) {
         return Quaternion.Dot(q, q);
         //return q.x * q.x + q.y + q.y + q.z * q.z + q.w + q.w;
@@ -100,10 +109,15 @@ public static class Math_JC {
         return vectorNormalized *= size;
     }
 
-    public static Rect extended(this Rect r, Vector2 p ) {
+    public static Rect extended(this Rect r, Vector2 p) {
         r.min = Vector2.Min(r.min, p);
         r.max = Vector2.Max(r.max, p);
         return r;
+    }
+
+    public static Rect lerp( this Rect a, Rect b, float d ) {
+
+        return new Rect(Vector2.LerpUnclamped(a.position, b.position, d), Vector2.LerpUnclamped(a.size, b.size, d) );
     }
 
     //Find the line of intersection between two planes.	The planes are defined by a normal and a point on that plane.

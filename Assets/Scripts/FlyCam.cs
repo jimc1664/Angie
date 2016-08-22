@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class FlyCam : MonoBehaviour {
+public class FlyCam : Cam_Beh {
 
     // Use this for initialization
     void Start() {
@@ -14,9 +14,10 @@ public class FlyCam : MonoBehaviour {
     void Update() {
 
         float delta = 0;
-        if(Time.timeScale > Mathf.Epsilon)
-            delta = Time.deltaTime / Time.unscaledDeltaTime;
+        //if(Time.timeScale > Mathf.Epsilon)
+        //    delta = Time.deltaTime / Time.unscaledDeltaTime;
 
+        delta = Time.unscaledDeltaTime;
 
         float spd = delta * Speed;
 

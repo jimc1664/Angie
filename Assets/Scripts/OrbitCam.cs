@@ -1,7 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class OrbitCam : MonoBehaviour {
+
+public class Cam_Beh : MonoBehaviour {
+
+    public Camera Cam;
+
+
+    void Awake() {
+        Cam = GetComponent<Camera>();
+    }
+}
+public class OrbitCam : Cam_Beh {
 
     public float Dis;
     public Transform Target;
@@ -28,8 +38,14 @@ public class OrbitCam : MonoBehaviour {
         Vector3 p = targetP();
         D = Mathf.Sqrt( (transform.position - p).magnitude );
         CRot = transform.rotation;
-    }
 
+   
+    }
+    void Start() {
+
+        UIMain.Singleton.SolCam = this;
+    }
+    
     void Update() {
         Vector3 p = targetP();
 

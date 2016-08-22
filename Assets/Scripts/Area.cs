@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Sim {
-    public class Area : MonoBehaviour {
+    public class Area : MonoBehaviour, IQuadTreeObject {
 
 
         public Transform Vis;
-        public float Radius = 10.0f;
+        
 
         //public Station St;
         [System.NonSerialized]
@@ -28,25 +28,66 @@ namespace Sim {
         };
         public StatusE Status = StatusE.Unknown, NStatus = StatusE.Unknown;
 
+        //public Vector2 Pos;
+        public Vector2 GetPosition() {
+            return new Vector2( Pos3.x, Pos3.z);// * 10.0f;
+        }
+        public float Rad {
+            get {
+                return _Sol_Radius;
+            }
+        }
+        float _Radius, _Sol_Radius;
+        public float Radius {
+            get {
+                return _Radius;
+            }
+            set {
+                _Radius = value;
+                _Sol_Radius = _Radius * StarGen.Sol_2_Area;
+            }
+        }
+        public float Sol_Radius {
+            get {
+                return _Sol_Radius;
+            }
+            set {
+                _Sol_Radius = value;
+                _Radius = _Sol_Radius / StarGen.Sol_2_Area;
+            }
+        }
+
+        public Vector3 Pos3 {
+            get {
+                return transform.localPosition;
+            }
+        }
+        public List<Area> Nbrs;
+
+        public int Island = -1;
+
+
         static int Seeds = 0;
+
+        public static Transform VisContatiner;
         void Awake() {
             //St = GetComponentInChildren<Station>();
 
-            Vis = new GameObject().transform;
-            Vis.transform.parent = transform;
+            if(VisContatiner == null) {
+                var vc = GameObject.Find("__VisContainer");
+                if(vc == null)
+                    vc = new GameObject("__VisContainer");
+                VisContatiner = vc.transform;
+            }
+            Vis = new GameObject(name +" _vis" ).transform;
+            Vis.transform.parent = VisContatiner;
             Vis.gameObject.SetActive(false);
-            Vis.transform.localPosition = Vector3.zero;
+            Vis.transform.localPosition = transform.position *10.0f;
             Vis.transform.localRotation = Quaternion.identity;
             Vis.transform.localScale = Vector3.one;
             
             if(Seed == 0)
                 Seed = Seeds++;
-
-            if(Roids.Count == 0 && GenRoids != 0) {
-
-
-                gen();
-            }
         }
 
         void Start() {
@@ -56,9 +97,9 @@ namespace Sim {
         }
         public List<Asteroid> Roids;
         void gen() {
-
-            foreach(var a in GetComponentsInChildren<Asteroid>())
-                DestroyImmediate(a.gameObject);
+            if( !Application.isPlaying )
+                foreach(var a in GetComponentsInChildren<Asteroid>())
+                    DestroyImmediate(a.gameObject);
                 
             Random.seed = Seed;
             if(Seed == 0)
@@ -127,17 +168,25 @@ namespace Sim {
                     rm += 1 + 0.5f * Roids.Count;
                 }
 
-                Roids.Add(a);
 
+                Roids.Add(a);
+                if(Application.isPlaying)
+                    a.init();
                 //rc = 0;
             }
         }
         public bool Gen = false;
         public bool GenAll = false;
+        public bool KillAll = false;
         void OnDrawGizmos() {
 
+            if(KillAll) {
+                foreach(var a in FindObjectsOfType<Asteroid>()) DestroyImmediate(a.gameObject);
+                foreach(var a in FindObjectsOfType<Area>()) a.Roids.Clear();
+               KillAll = false;
+            }
             if(GenAll) {
-                foreach(var a in FindObjectsOfType<Area>()) a.Gen = true;                
+                foreach(var a in FindObjectsOfType<Area>()) a.Gen = true;
                 GenAll = false;
             }
             if(Gen) {
@@ -170,8 +219,13 @@ namespace Sim {
                 
             }
             Gizmos.color = c;
-            Gizmos.DrawWireSphere(transform.position, Radius);
+            Gizmos.DrawWireSphere(transform.position, Radius * StarGen.Sol_2_Area );
+
+            if( Application.isPlaying )
+            if( Mr != null || (Mr = GetComponentInChildren<MeshRenderer>()) != null )
+                Mr.material.color = c;
         }
+        MeshRenderer Mr;
 
         public bool IsVisible = false;
 
@@ -203,6 +257,7 @@ namespace Sim {
             Debug.Assert(d.Ar == null);
 
             if(d.Host as PlayerShipCtrlr) {
+
                 Vis.gameObject.SetActive( IsVisible = true );
 
                 foreach(var od in Drones) getHost(od);
@@ -219,6 +274,11 @@ namespace Sim {
                 d.Host.transform.parent = Vis;
             }
 
+            if( Drones.Count == 0 )
+                if(Roids.Count == 0 && GenRoids != 0) {
+                    gen();
+                    GenRoids = 0;
+                }
 
             d._setArea(this);
 
@@ -310,8 +370,10 @@ namespace Sim {
             Bodies.Add(b);
             Debug.Assert(b.Ar == null);
             b._setArea(this);
-            if(b.Host)
+            if(b.Host) {
                 b.Host.transform.parent = Vis;
+                b.Host.transform.localPosition = b.fd(0).Pos;
+            }
         }
 
         public List<Drone> Drones;

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,6 +8,9 @@ public class CtorMain : MonoBehaviour {
 
     public GameObject VoxelFab = null, CrnrFab;
     public GameObject GizmoFab;
+
+    public List<GameObject> ComponentFabs;
+
 
     public CtorUI UI;
 
@@ -48,27 +52,32 @@ public class CtorMain : MonoBehaviour {
             Tr = null;
             if(SHl) {
                 Tr = SHl.Tris[cm.Hl_D.TriI];
-                FHl = Tr.Vox.Faces[(int)Tr.D];
+                //FHl = Tr.Vox.Faces_Old[(int)Tr.D];
+                FHl = Tr.F;
                 VHl = Tr.Vox;
+                SHl = VHl.Strct;
             } else {
                 var h = um.Highlight as Handle;
                 if(h == null) return;
+                
+                
                 var v = VHl = h.V;
                 SHl = VHl.Strct;
                 float cd = float.MinValue;
 
-                var n = SHl.transform.InverseTransformDirection(cm.Hl_D.Nrm);
-                var f = FHl;
-                VHl.forEach((FaceT fc) => {
-                    var d = Vector3.Dot(v.nrm2(fc), n);
+                var n = SHl.Root.transform.InverseTransformDirection(cm.Hl_D.Nrm);
+                //var f = FHl;
+                FHl = null;
+                foreach(var f in VHl.Faces) {
+                    var d = Vector3.Dot(f.Sf.Nrm, n);
                     if(d > cd) {
                         cd = d;
-                        f = v.Faces[(int)fc];
+                        FHl = f;
                     }
-                });
-                FHl = f;
+                }
+                              
                 if( FHl != null )
-                    Tr = FHl.Tr;
+                    Tr = FHl.Sf.Tr; 
             }
         }
         readonly public UIMain Um;
@@ -99,10 +108,12 @@ public class CtorMain : MonoBehaviour {
         ch.C = c;
         ch.V = v;
         Crnrs.Add(ch);
-        ret.parent = v.transform.parent;
-        ret.localScale = Vector3.one * 0.1f;
         ret.localRotation = Quaternion.identity;
+        ret.parent = v.Strct.Root.Trnsfrm;
         ret.localPosition = c.V;
+
+        ret.parent = v.Strct.Trnsfrm;
+        ret.localScale = Vector3.one * 0.1f;
 
         if(c.Flag)
             go.GetComponent<MeshRenderer>().material = GizRed;
@@ -113,10 +124,13 @@ public class CtorMain : MonoBehaviour {
         var sel = cntx.Cu.Selected.Selection;
 
         foreach(var c in Crnrs) {
+            if(c == null) continue;
             c.C.Hndl = null; 
             Destroy(c.gameObject);
         }
         Crnrs.Clear();
+
+        //for( int i = 
 
         if(sel.Count > 0) {
             var p = Vector3.zero;
@@ -148,7 +162,7 @@ public class CtorMain : MonoBehaviour {
 
             }
             var cm = this;
-            var st = cntx.SHl;
+           // var st = cntx.SHl.Root;
             Giz.transform.position = p;
             Giz.transform.rotation = r;
 
@@ -162,23 +176,17 @@ public class CtorMain : MonoBehaviour {
                 }
                  
             }, (Vector3 t) => {
-
                 //var strct = sel[0].transform.parent;
-
                 foreach(var v in sel)
                     v.transform.parent = cm.Giz.transform;
 
                 cm.Giz.transform.Rotate(t);
 
-
                 foreach(var v in sel) {
                     v.transform.parent = v.Strct.Trnsfrm;
                     v.Strct.dirty();
                 }
-
             }, (Vector3 t) => {
-
-
                 foreach(var v in sel) {
                     v.transform.localScale += t;
                     v.Strct.dirty();
@@ -202,6 +210,8 @@ public class CtorMain : MonoBehaviour {
         public override void mouseUpdate(ref CtorUpCntx cntx, int bi) {
 
             if( cntx.Um.grabMouseDown(bi) ) {
+
+                cntx.Cm. selectInEditor(cntx.VHl);
 
                 bool selChange = false;
                 var sel = cntx.Cu.Selected.Selection;
@@ -230,6 +240,8 @@ public class CtorMain : MonoBehaviour {
                     if(cntx.VHl) {
                         sel.Add(cntx.VHl);
                         cntx.VHl.OnPointerSelect();
+
+                        CtorMain.Singleton.UI.setSelect(cntx.SHl);
                     }
                     selChange = true;
                 }
@@ -285,17 +297,33 @@ public class CtorMain : MonoBehaviour {
     }
 
     Voxel VHl;
-    CrnrHndl CSel; 
+    CrnrHndl CSel;
 
+    public void clearSelection() {
+        if(UI.Selected == null) return;
+        foreach(var v in UI.Selected.Selection)
+            v.OnPointerDeselect();
+        UI.Selected.Selection.Clear();
+    }
+
+    void selectInEditor( Voxel v ) {
+        if(v == null) return;
+        if( v.Strct.Root.SelectInEditor)
+            UnityEditor.Selection.objects = new Object[1] { v.gameObject };
+    }
     public void update( UIMain um ) {
 
         var cntx = new CtorUpCntx(this, um, UI) { };
 
-        if(cntx.SHl && (cntx.SHl.Ui == null || cntx.SHl != UI.Selected)  ) {
-
+        if(cntx.SHl && (UI.Selected== null || cntx.SHl.Root != UI.Selected.Root )  ) {
+            //if(CtorMain.Singleton.UI.Selected == null || CtorMain.Singleton
             if(cntx.Um.grabMouseDown(0) || cntx.Um.grabMouseDown(1) || cntx.Um.grabMouseDown(2)) {
-                if(cntx.SHl.Ui == null) CtorMain.Singleton.UI.add(cntx.SHl);
+                //if(cntx.SHl.Ui == null) CtorMain.Singleton.UI.add(cntx.SHl);
+                clearSelection();
                 CtorMain.Singleton.UI.setSelect(cntx.SHl);
+
+                selectInEditor(cntx.VHl);
+
             }
         }
 
@@ -312,7 +340,6 @@ public class CtorMain : MonoBehaviour {
         var crnr = um.Highlight as CrnrHndl;
 
         if(crnr && crnr.V ) {
-
             if(crnr == CSel) {
                 if(um.grabMouseUp(0)) {
                     Debug.Log("clicky");
@@ -358,9 +385,10 @@ public class CtorMain : MonoBehaviour {
 
 
         var go = Instantiate(VoxelFab);
+
+        go.transform.position = strct.Root.Trnsfrm.TransformPoint(cntx.FHl.Sf.Mid + cntx.FHl.Sf.Nrm * 0.5f);
         var nv = go.GetComponent<Voxel>();
         nv.init(strct );
-        go.transform.localPosition = v.transform.localPosition + v.midOff(cntx.Tr.D )*2.0f;
         go.transform.localRotation = v.transform.localRotation;
         go.transform.localScale = v.transform.localScale;
 

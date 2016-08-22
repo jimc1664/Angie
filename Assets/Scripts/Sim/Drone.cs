@@ -152,7 +152,7 @@ namespace Sim {
             Target = null;
             switch(Behavior) {
                 case BehaviorT.Mine:
-                    return false ;
+                   // return false ;
                     if(Mins > MaxMins * 0.9f || (St.Ar == Ar && Mins > 0)) {
                         if(St.Ar == Ar) {
                             Target = St;
@@ -164,9 +164,9 @@ namespace Sim {
                             return true;
                         }
                     } else {
-                        Asteroid[] trgs;
-                        trgs = Ar.GetComponentsInChildren<Asteroid>( true );
-                        if(trgs.Length == 0) {
+                       // Asteroid[] trgs;
+                        //trgs = Ar.GetComponentsInChildren<Asteroid>( true );
+                        if(Ar.Roids.Count <= 0 ) {
                             if(Ar == St.Ar)
                                 setWarpTarget(Ai.getTargetArea());
                             else
@@ -174,7 +174,7 @@ namespace Sim {
 
                             return true;
                         } else {
-                            Target = trgs[Random.Range(0, trgs.Length)].Bdy;
+                            Target = Ar.Roids[Random.Range(0, Ar.Roids.Count)].Bdy;
                             _State = StateT.Mine;
                         }
                     }
@@ -325,13 +325,11 @@ namespace Sim {
                     } else {
                         dv = Vector3.Cross(cntx.DesDir, Vector3.Cross(cntx.ODesDir, cntx.DesDir)) * MaxVel;
                     }
-                  //  Debug.DrawLine(cntx.Pos + Vector3.Cross(cntx.ODesDir, cntx.DesDir) * MaxVel, cntx.Pos, Color.cyan);
-                   // Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.yellow);
                     if(arriveM > arrE) {
                         dv = Vector3.Lerp(dv, cntx.DesDir * MaxVel, (arriveM - arrE) / (MaxVel * 0.5f));
                     }
                     cntx.DesVel += dv;
-                    //Debug.DrawLine(cntx.Pos + dv, cntx.Pos, Color.green);
+                    
                 } else
                     cntx.DesVel = cntx.DesDir * (arriveM - arrE) * 2;
 
@@ -577,7 +575,7 @@ namespace Sim {
             if( cntx.FireAt && Power > MaxPower * 0.25f) {
                 AimDot = Vector3.Dot(nDir, cntx.DesDir);
                 if(Vector3.Dot(nDir, cntx.DesDir) > 0.7f) {
-                    if( Host != null )
+                    if( Host != null && cntx.FireAt.Host != null )
                         Debug.DrawLine(Host.transform.position, cntx.FireAt.Host.transform.position, Color.red);
                     var td = cntx.FireAt as Drone;
                     td.Dmg += 5 * cntx.Delta;
@@ -732,9 +730,12 @@ public class Drone : Body {
         return ret;
     }
     public override void init() {
+
+        //var st = GetComponentInParent<Station>();
         var ar = GetComponentInParent<Sim.Area>();
 
-        var st = ar.GetComponentInChildren<Station>( true );
+        Debug.Log("ar  " + ar + "  ar.St   " + ar.St);
+        var st = ar.St != null  ? ar.St.Host as Station : ar.GetComponentInChildren<Station>( true );
         st.init();
 
         var sim = Simulation.Singleton;
@@ -769,13 +770,6 @@ public class Drone : Body {
 
     void OnDrawGizmos() {
         Trnsfrm = transform;
-        
-        Gizmos.color = Color.green;
-       // if(Target != null)
-        //    Gizmos.DrawLine(Trnsfrm.position, Target.position);
-
-        Gizmos.color = Color.blue;
-       // Gizmos.DrawLine(Trnsfrm.position, Trnsfrm.position + Vel );
         
 
         var rot = Trnsfrm.rotation;
