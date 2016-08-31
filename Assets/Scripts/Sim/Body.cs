@@ -141,21 +141,17 @@ public class Body : SimObj {
     public float Rad = 0.5f;
 
 
-
     protected void OnEnable() {
         Trnsfrm = transform;
     }
     protected Transform Trnsfrm;
 
     void Update() {
-
         if(Bdy != null) {
             var fd = Bdy.fdSmooth(Simulation.Singleton);
 
             Trnsfrm.localPosition = fd.Pos;
             Trnsfrm.localRotation = fd.Rot;
-
-
         }
     }
 

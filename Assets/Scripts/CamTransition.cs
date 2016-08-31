@@ -4,7 +4,7 @@ using System.Collections;
 public class CamTransition : MonoBehaviour {
 
     Cam_Beh C;
-    Camera[] Cams;
+    public Camera[] Cams;
 	void Start () {
         C = GetComponent<Cam_Beh>();
         Cams = GetComponentsInChildren <Camera>( true );
@@ -58,12 +58,12 @@ public class CamTransition : MonoBehaviour {
             var r  = new Rect(Vector2.zero, Vector2.one).lerp(new Rect(SrcP, Vector2.one *0.1f),1- dm);
             foreach(var c in Cams)
                 c.rect = r;
-            //            var pr = Cam.pixelRect;
+                        var pr = Cams[0].pixelRect;
             float ep = 5;
-            //if(Cam.pixelWidth < ep || Cam.pixelHeight < ep || pr.xMin > Screen.width- ep || pr.yMin > Screen.height- ep || pr.xMax < ep || pr.yMax < ep ) {
-            //    setEnabled(false);
+            if(Cams[0].pixelWidth < ep || Cams[0].pixelHeight < ep || pr.xMin > Screen.width- ep || pr.yMin > Screen.height- ep || pr.xMax < ep || pr.yMax < ep ) {
+                setEnabled(false);
                 // = new Rect( Cam.pixelRect.position, Vector2.
-           // }
+            }
         }
     }
 

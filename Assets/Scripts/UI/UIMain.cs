@@ -35,8 +35,11 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
     public GameObject Popup_Panel, Popup_Button, Popup_ButtonEx;
 
     public GameObject Icon_Frame, Icon_Ship, Icon_Station;
+    public GameObject Icon_Area, AreaDis;
+    public GameObject Label;
 
-    public RectTransform SolSys;
+
+    //  public RectTransform SolSys, Areas;
 
     public GameObject UI_Hl = null;
 
@@ -159,7 +162,7 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
                     if(Physics.Raycast(MRay, out hit, float.MaxValue, 1 << (30 + i))) {
                         nHl = hit.collider.GetComponent<UIEle>();
 
-                        Debug.Assert(nHl != null);
+                       // Debug.Assert(nHl != null); todo 
                         if(nHl != null)
                             nHl.highlight_Cast(this, hit);
                         break;
@@ -205,7 +208,7 @@ public class UIMain : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
 
         //SolCam.gameObject .SetActive(  UIMd == UIMode.Map );
-        SolSys.gameObject.SetActive(true);
+        SolMap.Singleton.gameObject.SetActive(true);
         SolCam.enabled = UIMd == UIMode.Map;
 
 

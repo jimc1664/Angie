@@ -13,6 +13,10 @@ public class ShipHud : MonoBehaviour {
 
     void OnEnable() {
         Plyr = FindObjectOfType<PlayerShipCtrlr>();
+        if(Plyr == null) {
+            enabled = false;
+            return;
+        }
         Plyr.UI = this;
 
         for( int i = TargetSels.Length; i-- >0; ) {
@@ -69,8 +73,6 @@ public class ShipHud : MonoBehaviour {
             }
         }
         public Drone Drn;
-
-
     };
 
     public TargetSel[] TargetSels;
@@ -303,7 +305,9 @@ public class ShipHud : MonoBehaviour {
 
                 t.IconFrame.gameObject.SetActive(t.Sel != null);
 
-                t.Txt.gameObject.SetActive(t.Sel != null || t.Bttn.isHighlighted);
+                bool vis = t.Sel != null || t.Bttn.isHighlighted;
+                t.Txt.gameObject.SetActive( vis );
+                if(vis) t.UI.SetAsLastSibling();
 
                 setMod(t.Mod, t == FireTarget);
 

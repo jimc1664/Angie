@@ -5,6 +5,7 @@ using System.Collections;
 public class CrnrHndl : UIEle {
     public Voxel V;
     public Voxel.Corner C;
+    public int Ci;
     void Awake() {
      //   V = GetComponentInParent<Voxel>();
     }

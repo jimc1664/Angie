@@ -70,8 +70,12 @@ namespace Sim {
         static int Seeds = 0;
 
         public static Transform VisContatiner;
+
+        public RectTransform Bttn;
+
         void Awake() {
             //St = GetComponentInChildren<Station>();
+            Sol_Radius = 0.1f;
 
             if(VisContatiner == null) {
                 var vc = GameObject.Find("__VisContainer");
@@ -88,13 +92,40 @@ namespace Sim {
             
             if(Seed == 0)
                 Seed = Seeds++;
+
+
+
         }
 
         void Start() {
+            var ico = Instantiate(UIMain.Singleton.Icon_Area);
+            var rt = Bttn = ico.GetComponent<RectTransform>();
+            rt.parent = SolMap.Singleton.Areas;
+            rt.localPosition = Vector3.zero;
+            rt.localScale = Vector3.one;
+            rt.localRotation = Quaternion.identity;
+            var bttn = ico.GetComponent<UnityEngine.UI.Button>();
+
+            bttn.onClick.AddListener(() => {
+                if(!this ) return;
+               
+                var cam = FindObjectOfType<OrbitCam>();                
+                if(cam.Target == transform) {
+                    AreaDisplay.set(this);
+                } else {
+                    cam.setTarget(transform);
+                }
+            });
 
             Simulation.Singleton.Areas.Add(this);
-
         }
+        void LateUpdate() {
+
+            if(UIMain.Singleton.SolCam.Cam.enabled) {                
+                Bttn.anchoredPosition = UIMain.Singleton.SolCam.Cam.WorldToScreenPoint(transform.position);
+            }
+        }
+
         public List<Asteroid> Roids;
         void gen() {
             if( !Application.isPlaying )
@@ -116,7 +147,7 @@ namespace Sim {
             //  List<Asteroid> roids = new List<Asteroid>();
             Roids.Clear();
             for( float rc = GenRoids; rc > 0; ) {            
-                var go = new GameObject();
+                var go = new GameObject ( "an Asteroid" );
                 var a = go.AddComponent<Asteroid>();
                 var t = go.transform;
                 t.parent = transform;
@@ -221,13 +252,30 @@ namespace Sim {
             Gizmos.color = c;
             Gizmos.DrawWireSphere(transform.position, Radius * StarGen.Sol_2_Area );
 
-            if( Application.isPlaying )
-            if( Mr != null || (Mr = GetComponentInChildren<MeshRenderer>()) != null )
-                Mr.material.color = c;
+            if(Application.isPlaying) {
+                if(Mr != null || (Mr = GetComponentInChildren<MeshRenderer>()) != null)
+                    Mr.material.color = c;
+
+                Bttn.GetComponent<UnityEngine.UI.RawImage>().color = c;
+            }
         }
         MeshRenderer Mr;
 
         public bool IsVisible = false;
+
+        void OnGUI() {
+
+            for(int i = Msgs.Count; i-- > 0;) {
+                var m = Msgs[i];
+                if((m.Tm -= Time.deltaTime) < 0) {
+                    Msgs.RemoveAt(i);
+                    if(m.UI)
+                        Destroy(m.UI.gameObject);
+                }  else if(IsVisible && UIMain.Singleton.UIMd == UIMain.UIMode.Ship ) {
+                    m.draw();
+                }
+            }
+        }
 
         void getHost(Drone d) {
             if(d.Host == null) {
@@ -253,10 +301,13 @@ namespace Sim {
             d.Host.transform.parent = Vis;
         }
 
+
+        public bool VisOverride = false;
+
         public void addDrone(Drone d) {
             Debug.Assert(d.Ar == null);
 
-            if(d.Host as PlayerShipCtrlr) {
+            if(d.Host as PlayerShipCtrlr  || VisOverride ) {
 
                 Vis.gameObject.SetActive( IsVisible = true );
 
@@ -331,6 +382,10 @@ namespace Sim {
                 NStatus = StatusE.Present;
             else
                 NStatus = StatusE.Owned;
+
+
+            if(AreaDisplay.Singleton && AreaDisplay.Singleton.Ar == this)
+                AreaDisplay.Singleton.addDrn(d);
         }
         public void remDrone(Drone d) {
             Debug.Assert(d.Ar == this);
@@ -341,7 +396,7 @@ namespace Sim {
             if( d.Host ) 
                 d.Host.transform.parent = World.Singleton.WarpingHosts;
 
-            if(d.Host as PlayerShipCtrlr) {
+            if(d.Host as PlayerShipCtrlr && !VisOverride ) {
                 
                 Vis.gameObject.SetActive(IsVisible = false);
             }
@@ -584,6 +639,17 @@ namespace Sim {
 
             Status = NStatus;
         }
+
+        public Vector3 worldPos(Vector3 tp) {
+            if(Vis == null) return tp;
+            return Vis.TransformPoint(tp);
+        }
+
+        public List<SimObj.ReportMessage> Msgs = new List<SimObj.ReportMessage>();
+
     }
+
+
+
 
 }

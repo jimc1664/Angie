@@ -58,6 +58,16 @@ namespace Sim {
             //h.Vis.gameObject.SetActive(false);
 
         }
+
+
+        public void deform() {
+            StateMd = 0;
+            if(State == Wormhole.StateE.Forming)
+                StateMd = 1 - StateMd;
+            else if(State == Wormhole.StateE.Hypothetical)
+                StateMd = 1;
+            State = Wormhole.StateE.Deforming;
+        }
     }
 }
 

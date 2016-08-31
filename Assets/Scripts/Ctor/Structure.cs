@@ -224,8 +224,8 @@ public class Structure : UIEle {
     };
     public class Vertex {
         public Vector4 V;
-        public Voxel[] Vox = new Voxel[8];
-        public int Vc = 0;
+        public List<Voxel> Vox = new List<Voxel>(8);
+       // public int Vc = 0;
         public long VMask = 0;
 
         public int Vi = -1;
@@ -505,23 +505,23 @@ public class Structure : UIEle {
     void mergeVertex(BuildCntx cntx, ref Vertex vrtx1, ref Vertex vrtx2, Voxel v1, Voxel v2) {
         if(vrtx1 == null && vrtx2 == null) {
             var v = new Vertex() {
-                Vc = 2,
+                //Vc = 2,
                 VMask = v1.VGroup | v2.VGroup,
                 V = Vector4.zero,
             };
             cntx.Verts.Add(v);
             vrtx1 = v;
             vrtx2 = v;
-            v.Vox[0] = v1;
-            v.Vox[1] = v2;
+            v.Vox.Add( v1 );
+            v.Vox.Add(v2 );
         } else if(vrtx1 != null && vrtx2 != null) {
             if(ReferenceEquals(vrtx1, vrtx2)) return;
             //vrtx2.V += vrtx1.V;
             vrtx2.VMask |= vrtx1.VMask;
             var vrtx1c = vrtx1;
-            for(int k = vrtx1.Vc; k-- > 0;) {
+            for(int k = vrtx1.Vox.Count; k-- > 0;) {
                 var vox = vrtx1c.Vox[k];
-                vrtx2.Vox[vrtx2.Vc++] = vox;
+                vrtx2.Vox.Add( vox );
                 for(int l = 8; l-- > 0;) {
                     if(cntx.Vert[vox, l] == vrtx1c) {
                         cntx.Vert[vox, l] = vrtx2;
@@ -531,15 +531,16 @@ public class Structure : UIEle {
                 }
             }
             Debug.Assert(ReferenceEquals(vrtx1, vrtx2));
-            vrtx1c.Vc = 0; //todo recycle
+          //  vrtx1c.Vc = 0; //todo recycle
+            vrtx1c.Vox.Clear();//todo recycle
             //vrtx1 = vrtx2;
         } else if(vrtx1 == null) {
             vrtx1 = vrtx2;
-            vrtx2.Vox[vrtx2.Vc++] = v1;
+            vrtx2.Vox.Add(v1);
             vrtx2.VMask |= v1.VGroup;
         } else {
             vrtx2 = vrtx1;
-            vrtx1.Vox[vrtx1.Vc++] = v2;
+            vrtx1.Vox.Add(v2);
             vrtx1.VMask |= v2.VGroup;
         }
     }
@@ -548,10 +549,10 @@ public class Structure : UIEle {
         if(ReferenceEquals(vrtx1, vrtx2)) return true;
         if((vrtx1.VMask & vrtx2.VMask) == 0) return true;
 
-        for(int i = vrtx1.Vc; i-- > 0;) {
+        for(int i = vrtx1.Vox.Count; i-- > 0;) {
             var v1 = vrtx1.Vox[i];
             if((v1.VGroup & vrtx2.VMask) == 0) continue;
-            for(int j = vrtx2.Vc; j-- > 0;)
+            for(int j = vrtx2.Vox.Count; j-- > 0;)
                 if(vrtx2.Vox[j] == v1) return false;
         }
         return true;
@@ -609,7 +610,7 @@ public class Structure : UIEle {
                     Debug.Log(" vm   " + (vrtx1.VMask & vrtx2.VMask) + "  " + vrtx1.VMask + "  " + vrtx2.VMask);
                     if((vrtx1.VMask & vrtx2.VMask) != 0) continue;
 
-                    Debug.Log(" vc   " + vrtx1.Vc + "  " + vrtx2.Vc);
+                    Debug.Log(" vc   " + vrtx1.Vox.Count + "  " + vrtx2.Vox.Count);
                 }
             } else
                 if(!checkVertex(cntx.Vert[v1, vi1], cntx.Vert[v2, vi2])) return false;
@@ -727,7 +728,7 @@ public class Structure : UIEle {
             for(;;) {
                 switch(nc) {
                     case 0: {//a tri
-                            Debug.Log("tri " + c);
+                         //   Debug.Log("tri " + c);
                             var f = new Face() {
                                 Vi = new int[3],
                                 V = v,
@@ -749,7 +750,7 @@ public class Structure : UIEle {
                             nc = countAdj(n);
                             Debug.Assert(!mask[n]);
                             if(nc != 1) {  //recentre on n                             
-                                Debug.Log("  !quad recentre! " + c);
+                           //     Debug.Log("  !quad recentre! " + c);
                                 c = n;
                                 Debug.Assert(nc != 0);
                                 continue;
@@ -773,7 +774,7 @@ public class Structure : UIEle {
                                         },
                             });
 
-                            Debug.Log("quad " + c + " -> " + n);
+                          //  Debug.Log("quad " + c + " -> " + n);
                             mask[c] = mask[n] = true;
 
                             //special case -- can form neighbour links
@@ -786,7 +787,7 @@ public class Structure : UIEle {
                             int n1 = VertAdj[c, ca_NbrI], n2 = VertAdj[c, (ca_NbrI + 1) % 3], n3 = VertAdj[c, (ca_NbrI + 2) % 3];
                             if(!cntx.Flag[v, n2]) Math_JC.swap(ref n2, ref n3);
 
-                            Debug.Log("d tri " + c + "  n1 " + n1 + "  n2 " + n2);
+                           // Debug.Log("d tri " + c + "  n1 " + n1 + "  n2 " + n2);
                             Debug.Assert(!mask[n1]);
                             Debug.Assert(!mask[n2]);
                             System.Action<int> dt = (int a) => {
@@ -808,7 +809,7 @@ public class Structure : UIEle {
                             break;
                         }
                     case 3: {//single tri but on the adjacent to the opposite of C -- beveled corner of two slopes
-                            Debug.Log(" s3  tri  c " + c);
+                          //  Debug.Log(" s3  tri  c " + c);
                             mask[c] = true;
                             //var t = new Tri() { V = v };
                             //cntx.Tris.Add(t);
@@ -1202,7 +1203,7 @@ public class Structure : UIEle {
                         for(int i = f.Vi.Length, j = 0; i-- > 0; j = i) {
 
                             int ii = f.Vi[i];
-                            if(cntx.Vert[v, ii].Vc == 1)
+                            if(cntx.Vert[v, ii].Vox.Count == 1)
                                 crnrCap[ii, ++crnrCap[ii, 0]] = cp1[i];
 
                             var el = f.Edges[i];
@@ -1346,6 +1347,7 @@ public class Structure : UIEle {
 
                 //v.Vi = null;
                 v.PossNbr.Clear();
+                v.Crnr.reset();
                 //            var of = v.Faces
                 //v.Faces_Old = null;
 
@@ -1366,7 +1368,7 @@ public class Structure : UIEle {
                     var viA = FaceVi[(int)fi];
                     for(int i = 4; i-- > 0;) {
                         int ii = viA[i];
-                        if(v.Crnr[ii] != null && v.Crnr[ii].Flag) {
+                        if(v.CrnrFlgs[ii] ) {
                             //Debug.Log("clipped");
                             clipping = cntx.Flag[v, ii] = true;
 
@@ -1411,8 +1413,11 @@ public class Structure : UIEle {
 
                 var mp = v.MP;
 
+                for(int i = 8; i-- > 0;)
+                    cntx.Crnr[v, i] = v.baseCrnrP(i);
+                /*
                 for(int i = 2; i-- > 0;) {   //todo get rid of this
-                                             // Vector3 n2 = Vector3.left;
+                                          // Vector3 n2 = Vector3.left;
                     for(int j = 2; j-- > 0;) {
                         Vector3 lp, lv;
                         int fi1 = ((int)FaceT.Down - i), fi2 = ((int)FaceT.Left - j);
@@ -1424,10 +1429,17 @@ public class Structure : UIEle {
                             int fi3 = ((int)FaceT.Back - k);
                             if(!Math_JC.linePlaneIntersection(out lp, lp, lv, mp[fi3, 1], mp[fi3, 0])) Debug.LogError("err");
                             int ii = i * 4 + j * 2 + k;
+
+                            Debug.Log("ii " + ii + "   " + lp + "   " + cntx.Crnr[v, ii]);
+
                             cntx.Crnr[v, ii] = lp;
+
+                            
                         }
                     }
-                }
+                } */
+
+
 
                 if(clipping)
                     s.doClipping(cntx, v, tFaceL);
@@ -1484,14 +1496,16 @@ public class Structure : UIEle {
     }
     void rebuild() {
 
+        if(Hullify) hullify();
+
         var cntx = new BuildCntx(this);
 
         prepVoxels(cntx);   
         //doNbrStuff(cntx);
 
         System.Func<Vector4, Voxel, Vertex> getV = (Vector4 p, Voxel v) => {
-            var ret = new Vertex() { V = p, Vc = 1, VMask = v.VGroup };
-            ret.Vox[0] = v;
+            var ret = new Vertex() { V = p, VMask = v.VGroup };
+            ret.Vox.Add(v);
             cntx.Verts.Add(ret);
             return ret;
         };
@@ -1512,18 +1526,25 @@ public class Structure : UIEle {
 
         for(int i = cntx.Verts.Count; i-- > 0;) {
             var v1 = cntx.Verts[i];
-            if(v1.Vc <= 0) continue;
+            if(v1.Vox.Count <= 0) continue;
             cntx.Verts[i].V = (Vector3)v1.V / v1.V.w;
         }
+
+
+
         foreach(var v in cntx.Vox) {
             if(v.State == Voxel.StateE.Invalid) continue;
             for(int i = 8; i-- > 0;) {
                 var vrt = cntx.Vert[v, i];
-                if(vrt.Crnr == null)
+                if(vrt.Crnr == null) {
                     vrt.Crnr = new Voxel.Corner() {
                         V = vrt.V,
-                        Flag = cntx.Flag[v, i]
+                        // Ci = i,
+                        //Flag = cntx.Flag[v, i]
+                        Vox = vrt.Vox,
                     };
+                }
+                v.CrnrFlgs[i] = cntx.Flag[v, i];
                 v.Crnr[i] = vrt.Crnr;
             }
         }
@@ -1607,7 +1628,285 @@ public class Structure : UIEle {
         foreach_Sub((Structure s) => {
             s.IsDirty = false;
         });
+        
+        Hullify &= Constant;
+            
         IsDirty = false;
+
+        
+    }
+
+    struct HullifyDat {
+        // public Voxel V;
+        public int Flags;
+        public IVec3 Off;
+        public float Dis;
+        public bool checkSet(int cf, IVec3 off) {
+            int chk = 1 << 9;
+            int f = Flags;
+            Flags |= cf;
+            Off += off;
+            //  Debug.Log(" before  " + f + "  cf  " + cf + "   after  " + Flags + "     c  " + ((Flags & chk) != 0));
+            if((Flags & chk) != 0) return false;
+            Flags |= chk;
+            Dis = -1;
+            return true;
+        }
+    };
+
+    struct HullifyDat2 {
+        // public Voxel V;
+        public byte Flags, Vc;
+    };
+
+    public bool Hullify = false;
+    public float HRad = 0.7f, HDisplace = 0.1f, HBoxEx = 0.3f, HCrnrCast = 0.4f;
+
+    //struct HullifyVoxDat
+
+    void hullify() {
+
+        var cc = GetComponentInChildren<CtorComponent>();
+
+        foreach(var v in Vox) 
+            Destroy(v.gameObject);
+
+        Vox.Clear();
+
+        Selection.Clear();
+        CtorMain.Singleton.DirtySelection = true;
+
+        int lm = 1 << 26;
+        RaycastHit hit;
+        Vector3 cp = transform.position;
+
+        DyArray<HullifyDat> arr = new DyArray<HullifyDat>();
+        DyArray<HullifyDat2> arr2 = new DyArray<HullifyDat2>();
+
+        List<IVec3> search = new List<IVec3>(),  voxL = new List<IVec3>(); ;
+
+        Vector3 ex = Vector3.one *HBoxEx;
+        // Collider[] col = new Collider[1];
+
+
+        IVec3[] adj = {
+            new IVec3(  1,0,0 ),
+            new IVec3(  0,1,0 ),
+            new IVec3(  0,0,1 ),
+            new IVec3(  -1,0,0 ),
+            new IVec3(  0,-1,0 ),
+            new IVec3(  0,0,-1 ),
+
+            new IVec3(  1,1,0 ),
+            new IVec3(  1,0,1 ),
+            new IVec3(  1,-1,0 ),
+            new IVec3(  1,0,-1 ),
+            new IVec3(  -1,1,0 ),
+            new IVec3(  -1,0,1 ),
+            new IVec3(  -1,-1,0 ),
+            new IVec3(  -1,0,-1 ),
+            new IVec3(  0,1,1 ),
+            new IVec3(  0,1,-1 ),
+            new IVec3(  0,-1,1 ),
+            new IVec3(  0,-1,-1 ),
+
+
+            new IVec3(  1,1,1 ),
+            new IVec3(  1,1,-1 ),
+            new IVec3(  1,-1,1 ),
+            new IVec3(  1,-1,-1 ),
+            new IVec3(  -1,1,1 ),
+            new IVec3(  -1,1,-1 ),
+            new IVec3(  -1,-1,1 ),
+            new IVec3(  -1,-1,-1 ),
+        };
+        float[] adjD = new float[adj.Length];
+        for( int i = adj.Length; i-- >0; )
+            adjD[i] = ((Vector3)adj[i]).magnitude;
+
+        //int ii = i * 4 + j * 2 + k;
+        // int fi1 = ((int)FaceT.Down - i), fi2 = ((int)FaceT.Left - j);
+        //int fi3 = ((int)FaceT.Back - k);
+
+        IVec3[] adj2 =  { ///todo  --  skip this -- generate voxels the kill corners based on adjacency
+            new IVec3( 0,0,0),
+            new IVec3( 0,0,1),
+            new IVec3( 1,0,0),
+            new IVec3( 1,0,1),
+            new IVec3( 0,1,0),
+            new IVec3( 0,1,1),
+            new IVec3( 1,1,0),
+            new IVec3( 1,1,1),
+
+            new IVec3( 0,0,-1),
+            new IVec3( 1,0,-1),
+            new IVec3( 0,1,-1),
+            new IVec3( 1,1,-1),
+            new IVec3( 0,0,2),
+            new IVec3( 1,0,2),
+            new IVec3( 0,1,2),
+            new IVec3( 1,1,2),
+
+
+            new IVec3( 0,-1,0),
+            new IVec3( 0,-1,1),
+            new IVec3( 1,-1,0),
+            new IVec3( 1,-1,1),
+            new IVec3( 0,2,0),
+            new IVec3( 0,2,1),
+            new IVec3( 1,2,0),
+            new IVec3( 1,2,1),
+
+            new IVec3( -1,0,0),
+            new IVec3( -1,0,1),
+            new IVec3( 2,0,0),
+            new IVec3( 2,0,1),
+            new IVec3( -1,1,0),
+            new IVec3( -1,1,1),
+            new IVec3( 2,1,0),
+            new IVec3( 2,1,1),
+
+        };
+      //  Debug.Assert(arr.op(new IVec3(0), (ref HullifyDat h) => { return h.checkSet(0); }) == true);
+      //  Debug.Assert(arr.op(new IVec3(0), (ref HullifyDat h) => { return h.checkSet(0); }) == false);
+        arr.op(new IVec3(0), (ref HullifyDat h) => { h.checkSet(0, new IVec3(0)); });
+
+        Vector3 hv3 = Vector3.one * 0.5f;
+        int vc4 = 0;
+        for(IVec3 c = new IVec3(0); ;) {
+            var p = cp + (Vector3)c;
+
+
+            bool cb = Physics.CheckBox(p, ex, Quaternion.identity, lm);
+            if(!cb) {
+                int vc = 0, cf = 255;
+                for(int i = 8; i-- > 0;) {
+                    //if((arr[c + adj2[i]].Flags & 1) != 0)
+                    //   cf &= ~(1 << i);
+                    var off = adj2[i];
+                    if(arr2.op(c + off, (ref HullifyDat2 d) => {
+                        if( d.Flags  == 0) {
+                            d.Flags = (byte) (Physics.CheckSphere((Vector3)(c + off) + hv3, HCrnrCast, lm) ? 2 : 1);
+                        }
+                        return (d.Flags & 3) == 1;
+                    })) {
+                        vc++;
+                        cf &= ~(1 << i);
+                    }
+                }
+
+
+                if(vc == 4)
+                    vc4++;
+
+                
+                cb = ! (vc >= 5);
+            }
+            if( cb ) {
+
+
+                // Gizmos.color = Color.red;
+                foreach(var off in adj) {
+                   // var off = new IVec3(adj, ai);
+                    var i = c + off; 
+                    if( arr.op(i, (ref HullifyDat h) => { return h.checkSet(0, off ); }) ) {
+                        search.Add(i);
+                    }
+                }
+                foreach(var a in adj2) {
+                    arr2.op(c + a, (ref HullifyDat2 d) => {
+                        if(d.Flags == 0) {
+                            d.Flags = (byte)(Physics.CheckSphere((Vector3)(c + a) + hv3, HCrnrCast, lm) ? 2 : 1);
+                        }
+                        d.Flags |= 4;
+                    });
+                }
+            } else {
+                for(int i = 8; i-- > 0;) {
+                    //if((arr[c + adj2[i]].Flags & 1) != 0)
+                    //   cf &= ~(1 << i);
+                    var off = adj2[i];
+                    arr2.op(c + off, (ref HullifyDat2 d) => {
+                        d.Vc++;
+                    });
+                }
+                // Gizmos.color = Color.green;
+                voxL.Add(c); 
+            }
+            //  Gizmos.DrawWireSphere(p, 0.5f);
+
+
+            if(search.Count <= 0) break;
+
+            c = search[0];
+            search.RemoveAt(0);
+
+        }
+
+        Debug.Log("vc4  " + vc4);
+        foreach(var c in voxL) {           
+            var dat = arr[c];
+            dat.Dis = 0;
+            if(dat.Off != new IVec3(0)) {
+                Vector3 dir = -((Vector3)dat.Off).normalized;
+                              
+                var r = new Ray(cp + (Vector3)c, dir);
+                float hDis = HDisplace / dir.maxAbsD();
+                if(Physics.BoxCast(r.origin, ex, r.direction, out hit, Quaternion.identity, hDis, lm)) {
+                    hDis = hit.distance;
+                }
+                dat.Dis = hDis * dir.maxAbsD();
+            }
+           // Debug.Log("c1  " + c + "  dat.Off  " + dat.Off + "  dat.Dis  " + dat.Dis );
+            arr[c] = dat;
+        }
+        foreach(var c in voxL) {
+
+            var go = Instantiate(CtorMain.Singleton.VoxelFab);
+            var v = go.GetComponent<Voxel>();
+            v.init(this);
+            v.transform.resetTransformation();
+            v.transform.localPosition = (Vector3)c;
+
+            var dat = arr[c];
+            Debug.Log("c  " + c + "  dat.Off  " + dat.Off + "  dat.Dis  " + dat.Dis + "  f " + arr2[c].Flags + "  vc " + arr2[c].Vc);
+
+            if(dat.Off != new IVec3(0)) {
+                Vector3 dir = -((Vector3)dat.Off).normalized;
+
+                float mod = 1.0f;
+                float d = dat.Dis * mod;
+
+                for(int i = adj.Length; i-- > 0;) {
+                    var nd = arr[c + adj[i]].Dis;
+                    if(nd >= 0) {
+                        d += nd;
+                        mod += adjD[i];
+                    }
+                }
+                v.transform.position += dir* (d / (mod*dir.maxAbsD()) );
+            }
+
+            v.transform.localScale *= HRad; 
+
+            //int cf = (~dat.Flags) & 255;
+
+            int cf = 255;
+
+            for(int i = 8; i-- > 0;) {
+                //if((arr[c + adj2[i]].Flags & 1) != 0)
+                //   cf &= ~(1 << i);
+                var off = adj2[i];
+                if(arr2.op(c + off, (ref HullifyDat2 d) => {
+                    return d.Flags == 5 && d.Vc >=4;
+                })) {
+                    cf &= ~(1 << i);
+                }
+            }
+           // break;
+            v.CrnrFlgs.Data = cf;
+        }
+
 
     }
     public bool DrawCp = false;
@@ -1918,10 +2217,7 @@ public class Structure : UIEle {
         Voxel V;
         public Voxel_Parser(Voxel v) { V = v; }
         public void write(BWriter io, Version version) {
-            byte cf = 0;
-            for(int i = 8; i-- > 0;)
-                if(V.Crnr[i] != null && V.Crnr[i].Flag)
-                    cf |= (byte)(1 << i);
+            byte cf = (byte)V.CrnrFlgs.Data;
 
             io.Write(V.transform.localPosition);
             io.Write(V.transform.localScale);
@@ -1937,11 +2233,9 @@ public class Structure : UIEle {
 
             //if(version >= Version.Add_Subs_Weighting) {
                 V.Weighting = io.ReadSingle();
-            
 
-            for(int j = 8; j-- > 0;)
-                if((cf & (1 << j)) != 0)
-                    V.Crnr[j] = new Voxel.Corner() { Flag = true };
+
+            V.CrnrFlgs.Data = cf;
         }
     };
 
@@ -2092,10 +2386,10 @@ public class Structure : UIEle {
         }
         if(DebugIter != LastDI) IsDirty = true;
 
-        bool re = IsDirty;
+        bool re = IsDirty || Hullify;
         if(Skip > 0) {
             --Skip;
-            re = false;
+          //  re = false;
         }
 
 
@@ -2108,7 +2402,7 @@ public class Structure : UIEle {
         }
     }
 
-
+   
     public int Skip = 0;
 
     public bool IsDirty = true;
@@ -2248,4 +2542,7 @@ public class Structure : UIEle {
 
     };
 */
+
+   
+
 }

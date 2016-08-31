@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Sim {
 
@@ -11,6 +12,9 @@ namespace Sim {
         public Beacon Bcn;
 
         public MasterAi.AreaDat AreaD;
+
+        public Cmpnt[] Cmpnts;
+        public Weapon Primary;
 
         public float MaxVel = 5;
         public float MaxSteer = 0.5f;
@@ -40,6 +44,7 @@ namespace Sim {
             Idle,
             Mine,
             Attack,
+           // Resupply,
             PrepWarp,
             Warping,
             PilotCtrl,
@@ -50,6 +55,7 @@ namespace Sim {
             Mine,
             //Dropoff,
             Hunt,
+            Resupply,
             Player,
         };
 
@@ -77,9 +83,16 @@ namespace Sim {
                 _State = StateT.Idle;
                 WarpTo = null;
                 Target = null;
+                if(Wormhole) {
+                    if(Wormhole.State != Wormhole.StateE.Deforming)
+                        Wormhole.deform();
+                    Wormhole = null;
+                }
             }
         }
         public new void update(ref Simulation.FrameCntx cntx) {
+            if(Host)
+                Host.onFrame();
             if((cntx.FrameInd & 1) == 0)
                 subUp(ref cntx, Fd1, ref Fd2);
             else
@@ -111,7 +124,7 @@ namespace Sim {
             WarpRdy = 0;
             _State = StateT.PrepWarp;
 
-            Debug.Log(  name+ " of "+Owner.name + "  warping too " + WarpTo );
+           // Debug.Log(  name+ " of "+Owner.name + "  warping too " + WarpTo );
         }
         public void enterWarp(ref Simulation.FrameCntx cntx) {
             WarpFrom = Ar;
@@ -218,38 +231,29 @@ namespace Sim {
                     } else
                         return true;
                     break;
+                case BehaviorT.Resupply:
+                    if(Ar != St.Ar) {
+                        setWarpTarget(St.Ar);
+                    } else {
+                        bool resupplied = false;
+                        Primary.AmmoCnt += 10;
+                        if(resupplied = (Primary.AmmoCnt >= Primary.MaxAmmo) ) 
+                            Primary.AmmoCnt = Primary.MaxAmmo;
+
+                        resupplied &= Power > MaxPower * 0.8f  && Hp > MaxHp * 0.9f;
+
+                        if(resupplied) {
+
+                            _Behavior = BehaviorT.Hunt;
+                            return true;
+                        }
+                    }
+                    break;
                 case BehaviorT.Player:
                     _State = StateT.PilotCtrl;
                     break;
             }
             return false;
-            /* if(St != null ) {
-
-             } else {
-
-                 foreach(var d in Ar.Drones) {
-                     if(d.St == null) continue;
-
-                     foreach(var md in GameObject.FindObjectsOfType<MiningDrone>()) {
-                         if(md.Drn.Ar == Ar) {
-                             Target = md.Drn;
-                             _State = StateT.Arrive;
-                             break;
-                         }
-                     }
-                     break;
-                 }
-
-                 if(Target == null) {
-                     var a = Bcn.getTargetArea();
-                     if(a != Ar)
-                         setWarpTarget(a);
-
-                 } else
-                     return true;
-             }
-
-             return false; */
         }
         float act_Sub_Arrive(ref DroneCntx cntx, float ep) {
 
@@ -304,7 +308,23 @@ namespace Sim {
                 _State = StateT.Idle;
                 return true;
             }
+
+            if(Hp < MaxHp * 0.5f) {
+                _Behavior = Drone.BehaviorT.Resupply;
+                _State = Drone.StateT.Idle;
+                return true;
+            }
+
+            float arrE = ArriveEp;
+
             cntx.FireAt = Target as Drone;
+            if(Power < MaxPower * 0.3f || Hp < MaxHp * 0.8f) {
+               // cntx.FireAt = null;
+                arrE *= 10.0f;
+                arrE += Ar.Radius;
+            } else if(Power < MaxPower * 0.5f) {
+                arrE *= 15.0f;
+            }
 
             Vector3 seekEp = Target.fd(cntx.FrameInd).Pos + Target.fd(cntx.FrameInd).Vel * 0.25f;
             Vector3 seek = seekEp - cntx.EffPos;
@@ -315,7 +335,7 @@ namespace Sim {
             if(arriveM > Mathf.Epsilon) {
                 cntx.DesDir = arrive / arriveM;
 
-                float arrE = ArriveEp;
+               
                 arrE *= 1.0f + (1 - Vector3.Dot(cntx.DesDir, cntx.ODesDir)) * 1.5f;
                 EffArriveEp = arrE;
                 if(arriveM < arrE + MaxVel * 0.5f) {
@@ -376,6 +396,9 @@ namespace Sim {
                     Dir = wVec,
                 };
                 Wormhole.init(Ar);
+
+                if( Host )
+                    Ar.Msgs.Add(new SimObj.ReportMessage("Warping to  <I><B>" + WarpTo.name  + "</B></I>", this, v * Ar.Radius, 5.0f));
             }
 
             if(Wormhole != null) {
@@ -444,7 +467,7 @@ namespace Sim {
 
             if(Wormhole == null) {
                 Wormhole = new Wormhole() {
-                    initPos = -(vec + Random.insideUnitSphere * 0.3f) * WarpTo.Radius,
+                    initPos = -(vec + Random.insideUnitSphere * 0.3f) * WarpTo.Radius*1.5f,
                     initRot = Quaternion.LookRotation(-vec, cntx.DesUp),
                     Rad = 0.25f + Rad * 2.0f,
                     Dir = -vec,
@@ -455,7 +478,7 @@ namespace Sim {
             Power -= cntx.Delta * 2;
             var v1 = WarpFrom.transform.position + vec * WarpFrom.Radius;
             var v2 = WarpTo.transform.position - vec * WarpTo.Radius;
-            Debug.DrawLine(v1, v2, Color.cyan);
+          //  Debug.DrawLine(v1, v2, Color.cyan);
 
             switch(Wormhole.State) {
                 case Wormhole.StateE.Hypothetical:
@@ -495,6 +518,7 @@ namespace Sim {
             return false;
         }
 
+        //Vector3 CPos;
         void updateStateStuff( ref Simulation.FrameCntx fc, ref DroneCntx cntx, FrameDat c, ref FrameDat n) {
             //  var rot = Rot;
             Matrix4x4 rotM = Matrix4x4.TRS(Vector3.zero, c.Rot, Vector3.one).transpose;
@@ -572,15 +596,8 @@ namespace Sim {
 
             var nDir = n.Rot * Vector3.forward;
 
-            if( cntx.FireAt && Power > MaxPower * 0.25f) {
-                AimDot = Vector3.Dot(nDir, cntx.DesDir);
-                if(Vector3.Dot(nDir, cntx.DesDir) > 0.7f) {
-                    if( Host != null && cntx.FireAt.Host != null )
-                        Debug.DrawLine(Host.transform.position, cntx.FireAt.Host.transform.position, Color.red);
-                    var td = cntx.FireAt as Drone;
-                    td.Dmg += 5 * cntx.Delta;
-                    Power -= 0.5f * cntx.Delta;
-                }
+            if(Primary != null ) {
+                Primary.pew( ref fc, this,  c, cntx.FireAt, nDir );
             }
 
             if(velM > MaxVel) {
@@ -628,7 +645,7 @@ namespace Sim {
             float op = Power;
 
             if(Hp < MaxHp) {
-                float p = Mathf.Min(10 * cntx.Delta, Power - MaxPower * 0.1f);
+                float p = Mathf.Min(10 * cntx.Delta, Power - MaxPower * 0.15f);
                 if(p > 0) {
                     Power -= p;
                     Hp += p * 0.5f;
@@ -678,6 +695,8 @@ public class Drone : Body {
    // public Transform Target;
    // public Station St;
 
+   
+
     public Vector3 Vel;
     public Quaternion AVel = Quaternion.identity;
 
@@ -697,9 +716,15 @@ public class Drone : Body {
 
     public bool Fighter = false;
 
+    public bool WeaponReport;
+
+
+  
     void Awake() {
     //    Trnsfrm = transform;
     }
+    public 
+    Cmpnt[] Cmpnts = null;
     public Sim.Drone buildSimDrone( Vector3 pos, Quaternion rot, Sim.Station st, Drone host ) {
         var sim = Simulation.Singleton;
         var ret = new Sim.Drone() {
@@ -724,9 +749,28 @@ public class Drone : Body {
 
             Host = host,
         };
-        if(host) host.Drn = ret;
+
+        //if(host) host.Drn = ret;
+
+        var oc = Cmpnts;
+       // if(Cmpnts == null )  --todo..
+            Cmpnts = GetComponentsInChildren<Cmpnt>(true);
+
+       // Debug.Log("build drone " + name + "  c1  " + Cmpnts.Length + "  oc  " + oc );
+
+        ret.Cmpnts = new Sim.Cmpnt[Cmpnts.Length];
+        for( int i = 0; i < Cmpnts.Length; i++ ) {
+            var c = Cmpnts[i];     
+            c.build(ret, i );
+        }
+        if(host)
+            host.init(ret);
+
 
         ret.init(st);
+
+
+
         return ret;
     }
     public override void init() {
@@ -734,7 +778,7 @@ public class Drone : Body {
         //var st = GetComponentInParent<Station>();
         var ar = GetComponentInParent<Sim.Area>();
 
-        Debug.Log("ar  " + ar + "  ar.St   " + ar.St);
+       // Debug.Log("ar  " + ar + "  ar.St   " + ar.St);
         var st = ar.St != null  ? ar.St.Host as Station : ar.GetComponentInChildren<Station>( true );
         st.init();
 
@@ -746,18 +790,22 @@ public class Drone : Body {
     public void init(Sim.Drone d) {
         d.Host = this;
         Drn = d;
+
+
+        Cmpnts = GetComponentsInChildren<Cmpnt>(true);
+       // Debug.Log("init drone " + name + "  c1  " + Cmpnts.Length + "  c2  " + d.Cmpnts.Length);
+
+        for(int i = 0; i < Cmpnts.Length; i++) {
+            var c = Cmpnts[i];
+            c.init(d, d.Cmpnts[i]);
+        }
     }
 
     protected new void OnEnable() {
-
         base.OnEnable();
-        //Trnsfrm = transform;
-
-
     }
 
     void Update() {
-
         if(Drn != null) {
             var fd = Drn.fdSmooth(Simulation.Singleton);
 
@@ -767,7 +815,6 @@ public class Drone : Body {
             AVel = fd.AVel;
         }
     }
-
     void OnDrawGizmos() {
         Trnsfrm = transform;
         

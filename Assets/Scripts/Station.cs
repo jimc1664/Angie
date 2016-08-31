@@ -119,6 +119,8 @@ namespace Sim {
                         md = (GameObject.Instantiate(Spawnables.Singleton.FighterDrn, DD.Pos, DD.Rot) as GameObject).GetComponent<global::Drone>();*/
 
                     bool miner = MinerCnt < 1 || FighterCnt >= MinerCnt;
+
+                    miner = false;
                     if(miner)
                         md = Spawnables.Singleton.MiningShip.GetComponent<global::Drone>();
                     else
@@ -191,11 +193,8 @@ namespace Sim {
             } else {
                 var ws = Warping;
 
-                if(ws.Dr == null) {
-                    ws.Wh.StateMd = 0;
-                    if(ws.Wh.State == Wormhole.StateE.Forming)
-                        ws.Wh.StateMd = 1 - ws.Wh.StateMd;
-                    ws.Wh.State = Wormhole.StateE.Deforming;                    
+                if(ws.Dr == null || ws.Dr.Wormhole != ws.Wh ) {
+                    ws.Wh.deform();
                     Warping = null;
                 } else {
                     switch(ws.Wh.State) {
@@ -296,7 +295,7 @@ public class Station : Body {
 
     public override void init() {
         if(Inited) return;
-        Debug.Log("init Station " + name);
+       // Debug.Log("init Station " + name);
         Inited = true;
         Sys = GetComponentInParent<StarSystem>();
        // Ar = GetComponentInParent<Area>();
@@ -357,7 +356,7 @@ public class Station : Body {
             }
         }
 
-        Debug.Log("init Station " + name +"  h "+ ar.St.Host);
+       // Debug.Log("init Station " + name +"  h "+ ar.St.Host);
     }
 
     void Start() {

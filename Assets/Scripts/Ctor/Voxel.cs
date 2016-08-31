@@ -17,6 +17,23 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     static int EmissivePropId = -1;
 
+
+    static Vector3[] BaseOff = {
+        new Vector3(-0.5f,-0.5f,-0.5f ),
+        new Vector3(-0.5f,-0.5f, 0.5f ),
+        new Vector3( 0.5f,-0.5f,-0.5f ),
+        new Vector3( 0.5f,-0.5f, 0.5f ),
+        new Vector3(-0.5f, 0.5f,-0.5f ),
+        new Vector3(-0.5f, 0.5f, 0.5f ),
+        new Vector3( 0.5f, 0.5f,-0.5f ),
+        new Vector3( 0.5f, 0.5f, 0.5f ),
+    };
+
+    public Vector3 baseCrnrP(int i) {
+        Matrix4x4 mat = Matrix4x4.TRS(Vector3.zero, Rot, Scale );
+        return mat.MultiplyVector(BaseOff[i] ) + Pos;
+    }
+
     void Start() {
         //init(GetComponentInParent<Structure>());
     }
@@ -144,10 +161,20 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
     }
 
     public void initCrnrs() {
+
+        if(Crnr.A == null) {
+            var tVox = new List<Voxel>(1); tVox.Add(this);    
+            for(int i = 8; i-- > 0;) {
+                var c = Crnr[i] = new Corner() {
+                    V = baseCrnrP(i),
+                    Vox = tVox,
+                };
+            }
+        }
         for(int i = 8; i-- > 0;) {
             var c = Crnr[i];
             if(c.Hndl == null) {
-                c.Hndl = CtorMain.Singleton.cornerHndl(this, c);
+                c.Hndl = CtorMain.Singleton.cornerHndl(this, c, i );
             }
         }
     }
@@ -373,7 +400,9 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     public class Corner {
         public Vector3 V;
-        public bool Flag = false;
+        //public bool Flag = false;
+        // public int Ci;
+        public List<Voxel> Vox;
         public Transform Hndl;
     };
     public struct Crnr_S {
@@ -408,12 +437,18 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
             }
         }
         public void reset() {
-            A = B = C = D = E= F= G= H= null;
+            A = B = C = D = E = F = G = H = null;
         }
     };
-
     public Crnr_S Crnr;
-  //  public Structure.Vertex [] Verts = new Structure.Vertex[8];
+
+
+    public SimpleBitField CrnrFlgs;
+
+
+
+
+    //  public Structure.Vertex [] Verts = new Structure.Vertex[8];
 
     public void forEach(System.Action<FaceT> sub) {
         sub(FaceT.Right);
@@ -548,9 +583,9 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
         return oi;
     }*/
 
-
+    public int InvCrnr;
     void OnDrawGizmos() {
-
+        InvCrnr = 0xff& ~CrnrFlgs.Data;
         Gizmos.color = Color.blue;
         if( State == StateE.Invalid) Gizmos.color = Color.red;
 
@@ -594,5 +629,5 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
       }*/
     }
 
-
+ //   public IVec3 HullI;
 }

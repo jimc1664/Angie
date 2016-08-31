@@ -68,6 +68,7 @@ public class CtorMain : MonoBehaviour {
                 var n = SHl.Root.transform.InverseTransformDirection(cm.Hl_D.Nrm);
                 //var f = FHl;
                 FHl = null;
+                if( VHl.State != Voxel.StateE.Invalid )
                 foreach(var f in VHl.Faces) {
                     var d = Vector3.Dot(f.Sf.Nrm, n);
                     if(d > cd) {
@@ -100,13 +101,14 @@ public class CtorMain : MonoBehaviour {
 
     public List<CrnrHndl> Crnrs;
 
-    public Transform cornerHndl(Voxel v, Voxel.Corner c) {
+    public Transform cornerHndl(Voxel v, Voxel.Corner c, int i ) {
       //  Debug.Log(" cornerHndl ?? ");
         var go = Instantiate(CrnrFab);
         var ret = go.transform;
         var ch = go.GetComponent<CrnrHndl>();
         ch.C = c;
         ch.V = v;
+        ch.Ci = i;
         Crnrs.Add(ch);
         ret.localRotation = Quaternion.identity;
         ret.parent = v.Strct.Root.Trnsfrm;
@@ -115,7 +117,7 @@ public class CtorMain : MonoBehaviour {
         ret.parent = v.Strct.Trnsfrm;
         ret.localScale = Vector3.one * 0.1f;
 
-        if(c.Flag)
+        if(v.CrnrFlgs[i])
             go.GetComponent<MeshRenderer>().material = GizRed;
 
         return ret;
@@ -343,7 +345,16 @@ public class CtorMain : MonoBehaviour {
             if(crnr == CSel) {
                 if(um.grabMouseUp(0)) {
                     Debug.Log("clicky");
-                    crnr.C.Flag = !crnr.C.Flag;
+                    
+                    var flg = !crnr.V.CrnrFlgs[crnr.Ci];
+                    foreach( var n in crnr.C.Vox )  {
+                        for(int i = 8; i-- > 0;) {
+                            if(n.Crnr[i] == crnr.C) {
+                                n.CrnrFlgs[i] = flg;
+                            }
+                        }                        
+                    }
+
                     crnr.V.Strct.dirty();
                 }
             } else {

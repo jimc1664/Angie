@@ -5,6 +5,122 @@ using System;
 /*
 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
 */
+
+
+
+public struct IVec3 {
+
+    public IVec3(int a) {
+        x = y = z = a;
+    }
+    public IVec3(int a, int b, int c) {
+        x = a; y = b; z = c;
+    }
+
+    public IVec3(int[,] adj, int ai)  {
+        x = adj[ai,0]; y = adj[ai, 1]; z = adj[ai, 2];
+    }
+
+    public int x, y, z;
+
+    static public IVec3 operator +(IVec3 a, IVec3 b) {
+        a.x += b.x;
+        a.y += b.y;
+        a.z += b.z;
+        return a;
+    }
+    public bool allLower(IVec3 o) {
+        return x < o.x && y < o.y && z < o.z;
+    }
+    public bool allGreaterOE(IVec3 o) {
+        return x >= o.x && y >= o.y && z >= o.z;
+    }
+    public bool contained(IVec3 mn, IVec3 mx) {
+        return (x >= mn.x && x < mx.x) && (y >= mn.y && y < mx.y) && (z >= mn.z && z < mx.z);
+    }
+
+    public static explicit operator Vector3(IVec3 a) {
+        return new Vector3(a.x, a.y, a.z);
+    }
+
+    public static implicit operator string(IVec3 a) {
+        return "X: " + a.x + "  Y: " + a.y + "  Z: " + a.z;
+    }
+
+
+
+
+}
+public class DyArray<T> {
+
+    public T get(IVec3 i) {
+        var ai = i + C;
+        validate(ref ai);
+        return Data[i.x, i.y, i.z];
+    }
+
+    public T this[IVec3 i] {
+        get {
+            var ai = i + C;
+            validate(ref ai);
+            return Data[ai.x, ai.y, ai.z];
+        }
+        set {
+            var ai = i + C;
+            validate(ref ai);
+            Data[ai.x, ai.y, ai.z] = value;
+        }
+    }
+
+    public delegate void Foo(ref T t);
+    public delegate bool FooB(ref T t);
+    public void op(IVec3 i, Foo f) {
+        var ai = i + C;
+        validate(ref ai);
+        f(ref Data[ai.x, ai.y, ai.z]);
+    }
+    public bool op(IVec3 i, FooB f) {
+        var ai = i + C;
+        validate(ref ai);
+        return f(ref Data[ai.x, ai.y, ai.z]);
+    }
+    bool boundFix(ref int i, ref int c, ref int s) {
+        if(i < 0) {
+            c -= i;
+            s -= i;
+            i = 0;
+            return true;
+        } else if(i >= s) {
+            s = i + 1;
+            return true;
+        }
+        return false;
+    }
+    void validate(ref IVec3 i) {
+        IVec3 oc = C, os = S;
+        var oi = i;
+        //Debug.Log("validate  " + i);
+        if(boundFix(ref i.x, ref C.x, ref S.x)
+            | boundFix(ref i.y, ref C.y, ref S.y)
+            | boundFix(ref i.z, ref C.z, ref S.z)) {
+
+            // Debug.Log(" fix  oi "+oi+ " -> i "+ i + " oc " + oc + "->C " + C + " os " + os + "->S " + S);
+            var od = Data;
+            Data = new T[S.x, S.y, S.z];
+            for(int a = os.x; a-- > 0;)
+                for(int b = os.y; b-- > 0;)
+                    for(int c = os.z; c-- > 0;) {
+                        //    Debug.Log("  cpy a " + a +" -> " + (a - oc.x + C.x) + " b " + b + " -> " + (b - oc.y + C.y) + " c " + c + " -> " + (c - oc.z + C.z));
+                        Data[a - oc.x + C.x, b - oc.y + C.y, c - oc.z + C.z] = od[a, b, c];
+                    }
+        }
+    }
+
+
+
+    T[,,] Data;
+    IVec3 C, S;
+};
 public struct Callback<T> {
     public T Data;
     public delegate void CB_T(T o);
@@ -29,6 +145,8 @@ public class DuplicateKeyComparer<TKey>
     }
 
 }
+
+[System.Serializable]
 public struct SimpleBitField {
     public int Data;
     public bool this[int indx] {
@@ -49,7 +167,7 @@ public static class Math_JC {
     public static float Au_Km = 149597870.700f;
     public static float Km_Au = 1.0f / Au_Km;
     public static void resetTransformation(this Transform trans) {
-        trans.position = Vector3.zero;
+        trans.localPosition = Vector3.zero;
         trans.localRotation = Quaternion.identity;
         trans.localScale = new Vector3(1, 1, 1);
     }
@@ -107,6 +225,13 @@ public static class Math_JC {
 
         //scale the vector
         return vectorNormalized *= size;
+    }
+    public static Vector3 abs(this Vector3 v) {
+        return new Vector3(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+    }
+    public static float maxAbsD(this Vector3 v) {
+        var abs = v.abs();
+        return Mathf.Max(abs.x, Math.Max(abs.y, abs.z ) );
     }
 
     public static Rect extended(this Rect r, Vector2 p) {

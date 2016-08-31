@@ -29,7 +29,7 @@ public class StarSystem : MonoBehaviour {
         foreach(var s in GetComponentsInChildren<Planetoid>())
             DestroyImmediate(s.gameObject);
 
-        var ui = UIMain.Singleton.SolSys;
+        var ui = SolMap.Singleton.SolSys;
         for(int i = ui.childCount; i-- > 0;)
             DestroyImmediate(ui.GetChild(i).gameObject);
 
