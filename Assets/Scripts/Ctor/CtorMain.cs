@@ -7,7 +7,7 @@ public class CtorMain : MonoBehaviour {
 
 
     public GameObject VoxelFab = null, CrnrFab;
-    public GameObject GizmoFab;
+    public GameObject GizmoFab, Sphere;
 
     public List<GameObject> ComponentFabs;
 
@@ -267,7 +267,6 @@ public class CtorMain : MonoBehaviour {
     [System.Serializable]
     public class CT_Extrude : CtorTool {
         public CT_Extrude() {
-
             Name = "Extrude";
         }
 
@@ -275,11 +274,26 @@ public class CtorMain : MonoBehaviour {
             var cm = CtorMain.Singleton;
             if(cntx.Um.grabMouseUp(bi)) {
                 if(cntx.VHl) {
-
-                    cm.extrudeClick( ref cntx );
+                    cm.extrudeClick(ref cntx);
                 }
-                // if(Selected.V) Selected.V.OnPointerDeselect();
-                // Selected.V = null;
+            }
+        }
+    };
+    [System.Serializable]
+    public class CT_Remove : CtorTool {
+        public CT_Remove() {
+            Name = "Reomve";
+        }
+
+        public override void mouseUpdate(ref CtorUpCntx cntx, int bi) {
+            var cm = CtorMain.Singleton;
+            if(cntx.Um.grabMouseUp(bi)) {
+                if(cntx.VHl) {
+                    if(Input.GetKey(KeyCode.LeftControl))
+                        cm.removeClick(ref cntx);
+                    else
+                        cm.extrudeClick(ref cntx);
+                }
             }
         }
     };
@@ -293,9 +307,10 @@ public class CtorMain : MonoBehaviour {
         ToolPool = new List<CtorTool>() {
             new CT_Manipulate(),
             new CT_Extrude(),
+            new CT_Remove(),
         };
         LeftTool = ToolPool[0];
-        RightTool = ToolPool[1];
+        RightTool = ToolPool[2];
     }
 
     Voxel VHl;
@@ -403,6 +418,21 @@ public class CtorMain : MonoBehaviour {
         go.transform.localRotation = v.transform.localRotation;
         go.transform.localScale = v.transform.localScale;
 
+
+    }
+    public void removeClick(ref CtorUpCntx cntx) {
+
+        
+        var v = cntx.VHl;
+        var strct = v.Strct;
+
+        if(strct.Root.Selection.Remove(v)) {
+            DirtySelection = true;
+        }
+
+        strct.dirty();
+        strct.Vox.Remove(v);
+        Destroy(v.gameObject);
 
     }
 }

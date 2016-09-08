@@ -404,6 +404,8 @@ public class Voxel : UIEle { //, IPointerEnterHandler, IPointerExitHandler, IPoi
         // public int Ci;
         public List<Voxel> Vox;
         public Transform Hndl;
+
+        public Structure.Vertex Vrtx;
     };
     public struct Crnr_S {
         public Corner A, B, C, D, E, F, G, H;

@@ -11,51 +11,57 @@ using System.Reflection;
 
 public static class DebugExtension
 {
-	#region DebugDrawFunctions
-	
-	/// <summary>
-	/// 	- Debugs a point.
-	/// </summary>
-	/// <param name='position'>
-	/// 	- The point to debug.
-	/// </param>
-	/// <param name='color'>
-	/// 	- The color of the point.
-	/// </param>
-	/// <param name='scale'>
-	/// 	- The size of the point.
-	/// </param>
-	/// <param name='duration'>
-	/// 	- How long to draw the point.
-	/// </param>
-	/// <param name='depthTest'>
-	/// 	- Whether or not this point should be faded when behind other objects.
-	/// </param>
-	public static void DebugPoint(Vector3 position, Color color, float scale = 1.0f, float duration = 0, bool depthTest = true)
-	{
-		color = (color == default(Color)) ? Color.white : color;
-		
-		Debug.DrawRay(position+(Vector3.up*(scale*0.5f)), -Vector3.up*scale, color, duration, depthTest);
-		Debug.DrawRay(position+(Vector3.right*(scale*0.5f)), -Vector3.right*scale, color, duration, depthTest);
-		Debug.DrawRay(position+(Vector3.forward*(scale*0.5f)), -Vector3.forward*scale, color, duration, depthTest);
-	}
-	
-	/// <summary>
-	/// 	- Debugs a point.
-	/// </summary>
-	/// <param name='position'>
-	/// 	- The point to debug.
-	/// </param>
-	/// <param name='scale'>
-	/// 	- The size of the point.
-	/// </param>
-	/// <param name='duration'>
-	/// 	- How long to draw the point.
-	/// </param>
-	/// <param name='depthTest'>
-	/// 	- Whether or not this point should be faded when behind other objects.
-	/// </param>
-	public static void DebugPoint(Vector3 position, float scale = 1.0f, float duration = 0, bool depthTest = true)
+    #region DebugDrawFunctions
+
+    /// <summary>
+    /// 	- Debugs a point.
+    /// </summary>
+    /// <param name='position'>
+    /// 	- The point to debug.
+    /// </param>
+    /// <param name='color'>
+    /// 	- The color of the point.
+    /// </param>
+    /// <param name='scale'>
+    /// 	- The size of the point.
+    /// </param>
+    /// <param name='duration'>
+    /// 	- How long to draw the point.
+    /// </param>
+    /// <param name='depthTest'>
+    /// 	- Whether or not this point should be faded when behind other objects.
+    /// </param>
+    public static void DebugPoint(Vector3 position, Color color, float scale, float duration, bool depthTest = true) {
+        color = (color == default(Color)) ? Color.white : color;
+
+        Debug.DrawRay(position + (Vector3.up * (scale * 0.5f)), -Vector3.up * scale, color, duration, depthTest);
+        Debug.DrawRay(position + (Vector3.right * (scale * 0.5f)), -Vector3.right * scale, color, duration, depthTest);
+        Debug.DrawRay(position + (Vector3.forward * (scale * 0.5f)), -Vector3.forward * scale, color, duration, depthTest);
+    }
+    public static void DebugPoint(Vector3 position, Color color, float scale = 1.0f) {
+        color = (color == default(Color)) ? Color.white : color;
+
+        Debug.DrawRay(position + (Vector3.up * (scale * 0.5f)), -Vector3.up * scale, color);
+        Debug.DrawRay(position + (Vector3.right * (scale * 0.5f)), -Vector3.right * scale, color);
+        Debug.DrawRay(position + (Vector3.forward * (scale * 0.5f)), -Vector3.forward * scale, color);
+    }
+
+    /// <summary>
+    /// 	- Debugs a point.
+    /// </summary>
+    /// <param name='position'>
+    /// 	- The point to debug.
+    /// </param>
+    /// <param name='scale'>
+    /// 	- The size of the point.
+    /// </param>
+    /// <param name='duration'>
+    /// 	- How long to draw the point.
+    /// </param>
+    /// <param name='depthTest'>
+    /// 	- Whether or not this point should be faded when behind other objects.
+    /// </param>
+    public static void DebugPoint(Vector3 position, float scale = 1.0f, float duration = 0, bool depthTest = true)
 	{
 		DebugPoint(position, Color.white, scale, duration, depthTest);
 	}
